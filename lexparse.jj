@@ -24,11 +24,6 @@ SKIP: { "\t" }
 TOKEN: { <PROG: "program"> }
 TOKEN: { <CONST: "const"> }
 
-TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
-TOKEN: { <NUM: ["1"-"9"] (["0"-"9"])*> }
-TOKEN: { <BOOL: ( "true" | "false" )>}
-TOKEN: { <CHAR: "'"[" " - "~"]"'">}
-
 TOKEN: { <PLUS: "+"> }
 TOKEN: { <MINUS: "-"> }
 TOKEN: { <TIMES: "*"> }
@@ -45,6 +40,11 @@ TOKEN: { <AND: "&&"> }
 TOKEN: { <OR: "||"> }
 TOKEN: { <PLUSx2: "++"> }
 TOKEN: { <MINUSx2: "--"> }
+
+TOKEN: { <NUM: ["1"-"9"] (["0"-"9"])*> }
+TOKEN: { <BOOL: ( "true" | "false" )>}
+TOKEN: { <CHAR: "'"[" " - "~"]"'">}
+TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
 
 void Prog(): {} { <PROG> <IDENT> (ConstDecl())* "{" "}" <EOF> }
 
