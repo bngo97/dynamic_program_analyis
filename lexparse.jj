@@ -1,0 +1,37 @@
+PARSER_BEGIN(MyParser)
+public class MyParser
+{
+}
+PARSER_END(MyParser)
+
+SKIP: { " " }
+SKIP: { "\r" }
+SKIP: { "\t" }
+
+TOKEN: { <IDENT: ["a"-"z"] (["a"-"z"] | ["0"-"9"] | "_")*>}
+TOKEN: { <NUM: ["1"-"9"] (["0-9"])*> }
+TOKEN: { <BOOL: ( "true" | "false" )>}
+TOKEN: { <CHAR: [" " - "~"]>}
+
+TOKEN: { <PLUS: "+"> }
+TOKEN: { <MINUS: "-"> }
+TOKEN: { <TIMES: "*"> }
+TOKEN: { <DIV: "/"> }
+TOKEN: { <MOD: "%"> }
+TOKEN: { <EQ: "="> }
+TOKEN: { <EQEQ: "=="> }
+TOKEN: { <NOTEQ: "!="> }
+TOKEN: { <GR: ">"> }
+TOKEN: { <GRE: ">="> }
+TOKEN: { <LE: "<"> }
+TOKEN: { <LEQ: "<="> }
+TOKEN: { <AND: "&&"> }
+TOKEN: { <OR: "||"> }
+TOKEN: { <PLUSx2: "++"> }
+TOKEN: { <MINUSx2: "--"> }
+
+void Prog(): {} { "prog" <IDENT> (ConstDecl())+ "{" "}" <EOF> }
+
+void ConstDecl(): {} { "const" Type() <IDENT> "=" (<NUM> | <CHAR> | <BOOL>)}
+
+void Type(): {} { <IDENT> }
