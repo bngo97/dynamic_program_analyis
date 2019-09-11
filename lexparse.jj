@@ -1,6 +1,19 @@
 PARSER_BEGIN(MyParser)
+import java.io.StringReader;
+
 public class MyParser
 {
+
+    public static void main(String[] args) throws ParseException {
+        try {
+            MyParser parser = new MyParser(new StringReader(args[0]));
+            parser.Prog();
+            System.out.println("Success!");
+        } catch (ParseException e) {
+            System.out.println("Syntax check failed:");
+            System.out.println(e.getMessage());
+        }
+    }
 }
 PARSER_END(MyParser)
 
@@ -8,10 +21,13 @@ SKIP: { " " }
 SKIP: { "\r" }
 SKIP: { "\t" }
 
-TOKEN: { <IDENT: ["a"-"z"] (["a"-"z"] | ["0"-"9"] | "_")*>}
-TOKEN: { <NUM: ["1"-"9"] (["0-9"])*> }
+TOKEN: { <PROG: "program"> }
+TOKEN: { <CONST: "const"> }
+
+TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
+TOKEN: { <NUM: ["1"-"9"] (["0"-"9"])*> }
 TOKEN: { <BOOL: ( "true" | "false" )>}
-TOKEN: { <CHAR: [" " - "~"]>}
+TOKEN: { <CHAR: "'"[" " - "~"]"'">}
 
 TOKEN: { <PLUS: "+"> }
 TOKEN: { <MINUS: "-"> }
@@ -30,8 +46,8 @@ TOKEN: { <OR: "||"> }
 TOKEN: { <PLUSx2: "++"> }
 TOKEN: { <MINUSx2: "--"> }
 
-void Prog(): {} { "prog" <IDENT> (ConstDecl())+ "{" "}" <EOF> }
+void Prog(): {} { <PROG> <IDENT> (ConstDecl())* "{" "}" <EOF> }
 
-void ConstDecl(): {} { "const" Type() <IDENT> "=" (<NUM> | <CHAR> | <BOOL>)}
+void ConstDecl(): {} { <CONST> Type() <IDENT> "=" (<NUM> | <CHAR> | <BOOL>)}
 
 void Type(): {} { <IDENT> }
