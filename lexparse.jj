@@ -3,7 +3,6 @@ import java.io.StringReader;
 
 public class MyParser
 {
-
     public static void main(String[] args) throws ParseException {
         try {
             MyParser parser = new MyParser(new StringReader(args[0]));
@@ -24,9 +23,6 @@ SKIP: { "\t" }
 
 TOKEN: { <PROG: "program"> }
 TOKEN: { <CONST: "const"> }
-TOKEN: { <INT: "int"> }
-TOKEN: { <CHAR: "char"> }
-TOKEN: { <BOOL: "bool"> }
 
 TOKEN: { <ENUM: "enum"> }
 TOKEN: { <CLASS: "class">}
@@ -34,38 +30,46 @@ TOKEN: { <INTERFACE: "interface"> }
 TOKEN: { <EXTENDS: "extends"> }
 TOKEN: { <IMPLEMENTS: "implements"> }
 TOKEN: { <VOID: "void"> }
+TOKEN: { <NEW: "new"> }
+TOKEN: { <IF: "if"> }
+TOKEN: { <ELSE: "else"> }
+TOKEN: { <FOR: "for"> }
+TOKEN: { <BREAK: "break"> }
+TOKEN: { <CONTINUE: "continue"> }
+TOKEN: { <RETURN: "return"> }
+TOKEN: { <READ: "read"> }
+TOKEN: { <PRINT: "print"> }
 
 TOKEN: { <PLUS: "+"> }
 TOKEN: { <MINUS: "-"> }
+
 TOKEN: { <TIMES: "*"> }
 TOKEN: { <DIV: "/"> }
 TOKEN: { <MOD: "%"> }
+
 TOKEN: { <EQ: "="> }
+
 TOKEN: { <EQEQ: "=="> }
 TOKEN: { <NOTEQ: "!="> }
 TOKEN: { <GR: ">"> }
 TOKEN: { <GRE: ">="> }
 TOKEN: { <LE: "<"> }
 TOKEN: { <LEQ: "<="> }
+
 TOKEN: { <AND: "&&"> }
 TOKEN: { <OR: "||"> }
+
 TOKEN: { <PLUSx2: "++"> }
 TOKEN: { <MINUSx2: "--"> }
 
-TOKEN: { <NUM: ["1"-"9"] (["0"-"9"])*> }
-TOKEN: { <BOOLEAN: ( "true" | "false" )>}
-TOKEN: { <CHARACTER: "'"[" " - "~"]"'">}
+TOKEN: { <NUM: (["0"-"9"])+ > }
+TOKEN: { <BOOL: ( "true" | "false" )>}
+TOKEN: { <CHAR: "'"[" " - "~"]"'">}
 TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
 
 void Prog(): {} { <PROG> <IDENT> (ConstDecl() | EnumDecl() | VarDecl() | ClassDecl() | InterfaceDecl())* "{" "}" <EOF> }
 
-void ConstDecl(): {} { <CONST> (ConstInt() | ConstBool() | ConstChar()) }
-
-void ConstInt(): {} { <INT> <IDENT> <EQ> <NUM> ("," <IDENT> <EQ> <NUM>)* ";" }
-
-void ConstBool(): {} { <BOOL> <IDENT> <EQ> <BOOLEAN> ("," <IDENT> <EQ> <BOOLEAN>)* ";" }
-
-void ConstChar(): {} { <CHAR> <IDENT> <EQ> <CHARACTER> ("," <IDENT> <EQ> <CHARACTER>)* ";" }
+void ConstDecl(): {} { <CONST> Type() <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ) ("," <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ))* ";" }
 
 void EnumDecl(): {} { <ENUM> <IDENT> "{" <IDENT> [<EQ><NUM>] ("," <IDENT> [<EQ><NUM>])*"}" }
 
@@ -79,7 +83,44 @@ void FormPars(): {} { Type() <IDENT> ["[" "]"] ("," Type() <IDENT> ["[" "]"])* }
 
 void ClassDecl(): {} { <CLASS> <IDENT> [<EXTENDS> Type()] [<IMPLEMENTS> Type() ("," Type())* ] "{" (VarDecl())* ["{" (MethodDecl())* "}"] "}"}
 
-void MethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" (VarDecl())* "{" "}"}
+void MethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" (VarDecl())* "{" (Statement())* "}"}
 
-void Type(): {} { (<INT> | <CHAR> | <BOOL> | <IDENT>) }
+void Type(): {} { <IDENT> }
 
+void Statement(): {} {
+    (DesignatorStatement() ";") |
+    (<IF> "(" Condition() ")" Statement() [<ELSE> Statement()]) |
+    (<FOR> "(" [DesignatorStatement()] ";" [Condition()] ";" [DesignatorStatement()] ")" Statement()) |
+    (<BREAK> ";") |
+    (<CONTINUE> ";") |
+    (<RETURN> [Expr()] ";") |
+    (<READ> "(" Designator() ")" ";") |
+    (<PRINT> "(" Expr() ["," <NUM>] ")" ";") |
+    ("{" (Statement())* "}")
+}
+
+void DesignatorStatement(): {} { Designator() ((Assignop() Expr()) | ("(" [ActPars()] ")") | <PLUSx2> | <MINUSx2>) }
+
+void Designator(): {} { <IDENT> (("." <IDENT>) | ("[" Expr() "]"))*}
+
+void Condition(): {} { CondTerm() (<OR> CondTerm())* }
+
+void CondTerm(): {} { CondFact() (<AND> CondFact())* }
+
+void CondFact(): {} { Expr() [Relop() Expr()] }
+
+void Expr(): {} { [ <MINUS> ] Term() (Addop() Term())* }
+
+void Term(): {} { Factor() (Mulop() Factor())* }
+
+void Factor(): {} { ( (Designator() ["(" [ActPars()] ")"]) | (<NUM>) | (<CHAR>) | <BOOL> | (<NEW> Type() ["[" Expr() "]"])) }
+
+void ActPars(): {} { Expr() ("," Expr())* }
+
+void Assignop(): {} { <EQ> }
+
+void Relop(): {} { ( <EQEQ> | <NOTEQ> | <GR> | <GRE> | <LE> | <LEQ>) }
+
+void Addop(): {} { ( <PLUS> | <MINUS> ) }
+
+void Mulop(): {} { ( <TIMES> | <DIV> | <MOD> ) }
