@@ -18,11 +18,22 @@ public class MyParser
 PARSER_END(MyParser)
 
 SKIP: { " " }
+SKIP: { "\n" }
 SKIP: { "\r" }
 SKIP: { "\t" }
 
 TOKEN: { <PROG: "program"> }
 TOKEN: { <CONST: "const"> }
+TOKEN: { <INT: "int"> }
+TOKEN: { <CHAR: "char"> }
+TOKEN: { <BOOL: "bool"> }
+
+TOKEN: { <ENUM: "enum"> }
+TOKEN: { <CLASS: "class">}
+TOKEN: { <INTERFACE: "interface"> }
+TOKEN: { <EXTENDS: "extends"> }
+TOKEN: { <IMPLEMENTS: "implements"> }
+TOKEN: { <VOID: "void"> }
 
 TOKEN: { <PLUS: "+"> }
 TOKEN: { <MINUS: "-"> }
@@ -42,12 +53,33 @@ TOKEN: { <PLUSx2: "++"> }
 TOKEN: { <MINUSx2: "--"> }
 
 TOKEN: { <NUM: ["1"-"9"] (["0"-"9"])*> }
-TOKEN: { <BOOL: ( "true" | "false" )>}
-TOKEN: { <CHAR: "'"[" " - "~"]"'">}
+TOKEN: { <BOOLEAN: ( "true" | "false" )>}
+TOKEN: { <CHARACTER: "'"[" " - "~"]"'">}
 TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
 
-void Prog(): {} { <PROG> <IDENT> (ConstDecl())* "{" "}" <EOF> }
+void Prog(): {} { <PROG> <IDENT> (ConstDecl() | EnumDecl() | VarDecl() | ClassDecl() | InterfaceDecl())* "{" "}" <EOF> }
 
-void ConstDecl(): {} { <CONST> Type() <IDENT> "=" (<NUM> | <CHAR> | <BOOL>)}
+void ConstDecl(): {} { <CONST> (ConstInt() | ConstBool() | ConstChar()) }
 
-void Type(): {} { <IDENT> }
+void ConstInt(): {} { <INT> <IDENT> <EQ> <NUM> ("," <IDENT> <EQ> <NUM>)* ";" }
+
+void ConstBool(): {} { <BOOL> <IDENT> <EQ> <BOOLEAN> ("," <IDENT> <EQ> <BOOLEAN>)* ";" }
+
+void ConstChar(): {} { <CHAR> <IDENT> <EQ> <CHARACTER> ("," <IDENT> <EQ> <CHARACTER>)* ";" }
+
+void EnumDecl(): {} { <ENUM> <IDENT> "{" <IDENT> [<EQ><NUM>] ("," <IDENT> [<EQ><NUM>])*"}" }
+
+void VarDecl(): {} { Type() <IDENT> ["[" "]"] ("," <IDENT> ["[" "]"])* ";" }
+
+void InterfaceDecl(): {} { <INTERFACE> <IDENT> "{" (InterfaceMethodDecl())* "}" }
+
+void InterfaceMethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" ";"}
+
+void FormPars(): {} { Type() <IDENT> ["[" "]"] ("," Type() <IDENT> ["[" "]"])* }
+
+void ClassDecl(): {} { <CLASS> <IDENT> [<EXTENDS> Type()] [<IMPLEMENTS> Type() ("," Type())* ] "{" (VarDecl())* ["{" (MethodDecl())* "}"] "}"}
+
+void MethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" (VarDecl())* "{" "}"}
+
+void Type(): {} { (<INT> | <CHAR> | <BOOL> | <IDENT>) }
+
