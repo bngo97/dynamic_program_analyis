@@ -253,11 +253,32 @@ NodeDesignator Designator(): {
     }
 }
 
-void Condition(): {} { CondTerm() (<OR> CondTerm())* }
+NodeCondition Condition(): {
+    List<NodeCondTerm> terms = new ArrayList<NodeCondTerm>();
+    NodeCondTerm term = null;
+} { term=CondTerm() { terms.add(term); } (<OR> term=CondTerm() { terms.add(term); })*
+    {
+        return new NodeCondition(terms);
+    }
+}
 
-void CondTerm(): {} { CondFact() (<AND> CondFact())* }
+NodeCondTerm CondTerm(): {
+    List<NodeCondFact> facts = new ArrayList<NodeCondFact>();
+    NodeCondFact fact = null;
+} { fact=CondFact() { facts.add(fact); } (<AND> fact=CondFact() { facts.add(fact); })*
+    {
+        return new NodeCondTerm(facts);
+    }
+}
 
-void CondFact(): {} { Expr() [Relop() Expr()] }
+NodeCondFact CondFact(): {
+    NodeExpr expr1 = null;
+    NodeExpr expr2 = null;
+} { expr1=Expr() [Relop() expr2=Expr()]
+    {
+        return new NodeCondFact(expr1, expr2);
+    }
+}
 
 NodeExpr Expr(): {
     List<NodeTerm> terms = new ArrayList<NodeTerm>();

@@ -796,8 +796,10 @@ exprs.add(expr);
     throw new Error("Missing return statement in function");
 }
 
-  static final public void Condition() throws ParseException {
-    CondTerm();
+  static final public NodeCondition Condition() throws ParseException {List<NodeCondTerm> terms = new ArrayList<NodeCondTerm>();
+    NodeCondTerm term = null;
+    term = CondTerm();
+terms.add(term);
     label_15:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -810,12 +812,17 @@ exprs.add(expr);
         break label_15;
       }
       jj_consume_token(OR);
-      CondTerm();
+      term = CondTerm();
+terms.add(term);
     }
+{if ("" != null) return new NodeCondition(terms);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void CondTerm() throws ParseException {
-    CondFact();
+  static final public NodeCondTerm CondTerm() throws ParseException {List<NodeCondFact> facts = new ArrayList<NodeCondFact>();
+    NodeCondFact fact = null;
+    fact = CondFact();
+facts.add(fact);
     label_16:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -828,12 +835,16 @@ exprs.add(expr);
         break label_16;
       }
       jj_consume_token(AND);
-      CondFact();
+      fact = CondFact();
+facts.add(fact);
     }
+{if ("" != null) return new NodeCondTerm(facts);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void CondFact() throws ParseException {
-    Expr();
+  static final public NodeCondFact CondFact() throws ParseException {NodeExpr expr1 = null;
+    NodeExpr expr2 = null;
+    expr1 = Expr();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQEQ:
     case NOTEQ:
@@ -842,13 +853,15 @@ exprs.add(expr);
     case LE:
     case LEQ:{
       Relop();
-      Expr();
+      expr2 = Expr();
       break;
       }
     default:
       jj_la1[42] = jj_gen;
       ;
     }
+{if ("" != null) return new NodeCondFact(expr1, expr2);}
+    throw new Error("Missing return statement in function");
 }
 
   static final public NodeExpr Expr() throws ParseException {List<NodeTerm> terms = new ArrayList<NodeTerm>();
