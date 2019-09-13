@@ -9,7 +9,8 @@ public class NodeVarDecl extends NodeDecl {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        v.visitEnd(this);
     }
 
     @Override

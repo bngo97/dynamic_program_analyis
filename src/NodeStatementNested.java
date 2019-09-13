@@ -10,7 +10,11 @@ public class NodeStatementNested extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeStatement statement : statements) {
+            statement.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

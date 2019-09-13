@@ -10,7 +10,12 @@ public class NodeFactorDesignator extends NodeFactor {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        designator.accept(v);
+        if(actPars != null) {
+            actPars.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

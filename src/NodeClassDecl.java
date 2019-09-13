@@ -17,7 +17,14 @@ public class NodeClassDecl extends NodeDecl {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeVarDecl var : vars) {
+            var.accept(v);
+        }
+        for(NodeMethodDecl method :  methods) {
+            method.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

@@ -8,7 +8,8 @@ public class NodeFactorPrimitive extends NodeFactor {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        v.visitEnd(this);
     }
 
     @Override

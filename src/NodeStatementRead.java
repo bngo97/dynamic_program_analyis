@@ -8,7 +8,9 @@ public class NodeStatementRead extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        designator.accept(v);
+        v.visitEnd(this);
     }
 
     @Override

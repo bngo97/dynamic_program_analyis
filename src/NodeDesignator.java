@@ -12,7 +12,11 @@ public class NodeDesignator extends Node {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeExpr expression : expressions) {
+            expression.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

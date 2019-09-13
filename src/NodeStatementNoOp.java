@@ -1,12 +1,11 @@
 public class NodeStatementNoOp extends NodeStatement {
 
-    public NodeStatementNoOp() {
-
-    }
+    public NodeStatementNoOp() {}
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        v.visitEnd(this);
     }
 
     @Override

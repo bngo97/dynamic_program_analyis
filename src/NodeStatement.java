@@ -1,3 +1,1 @@
-public abstract class NodeStatement extends Node {
-    
-}
+public abstract class NodeStatement extends Node {}

@@ -13,7 +13,13 @@ public class NodeStatementIf extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        condition.accept(v);
+        statement1.accept(v);
+        if(statement2 != null) {
+            statement2.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

@@ -33,4 +33,17 @@ program P
 		}
 	}
 {
+	
+	int sub(char c, Object o) bool b; {
+		for(;;) {
+			break;
+			continue;
+			y--;
+		}
+	}
+
+	void main() int a, b; {}
+
+	void main() {}
+
 } 

@@ -11,7 +11,12 @@ public class NodeCondFact extends Node {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        expression1.accept(v);
+        if(expression2 != null) {
+            expression2.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

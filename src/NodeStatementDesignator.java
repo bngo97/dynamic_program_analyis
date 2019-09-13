@@ -12,7 +12,15 @@ public class NodeStatementDesignator extends NodeStatement{
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        designator.accept(v);
+        if(expression != null) {
+            expression.accept(v);
+        }
+        if(actPars != null) {
+            actPars.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

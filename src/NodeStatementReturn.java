@@ -8,7 +8,11 @@ public class NodeStatementReturn extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        if(expression != null) {
+            expression.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

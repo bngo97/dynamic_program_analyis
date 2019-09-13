@@ -18,7 +18,20 @@ public class NodeStatementFor extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        if(statement1 != null) {
+            statement1.accept(v);
+        }
+        if(condition != null) {
+            condition.accept(v);
+        }
+        if(statement2 != null) {
+            statement2.accept(v);
+        }
+        if(statement3 != null) {
+            statement3.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

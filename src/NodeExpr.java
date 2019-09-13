@@ -10,7 +10,11 @@ public class NodeExpr extends Node {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeTerm term : terms) {
+            term.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

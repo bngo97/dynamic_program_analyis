@@ -10,7 +10,11 @@ public class NodeCondTerm extends Node {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeCondFact fact : facts) {
+            fact.accept(v);
+        }
+        v.visitEnd(this );
     }
 
     @Override

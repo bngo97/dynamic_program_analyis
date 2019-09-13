@@ -10,7 +10,11 @@ public class NodeFactorNew extends NodeFactor {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        if(expression != null) {
+            expression.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override

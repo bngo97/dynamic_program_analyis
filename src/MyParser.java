@@ -25,6 +25,8 @@ public class MyParser implements MyParserConstants {
         }
         try {
             NodeProg p = parser.Prog();
+            Visitor v = new MyVisitor();
+            p.accept(v);
 //            for(NodeConstDecl n : p.constDecls) {
 //                System.out.println(n);
 //            }
@@ -34,9 +36,9 @@ public class MyParser implements MyParserConstants {
 //            for(NodeVarDecl n : p.varDecls) {
 //                System.out.println(n);
 //            }
-            for(NodeClassDecl n : p.classDecls) {
-                System.out.println(n);
-            }
+//            for(NodeClassDecl n : p.classDecls) {
+//                System.out.println(n);
+//            }
             System.out.println("Success!");
         } catch(Exception e) {
             System.out.println("Syntax check failed:");
@@ -53,6 +55,8 @@ public class MyParser implements MyParserConstants {
     List<NodeVarDecl> varDecl = null;
     List<NodeClassDecl> classDecls = new ArrayList<NodeClassDecl>();
     NodeClassDecl classDecl = null;
+    List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
+    NodeMethodDecl method = null;
     jj_consume_token(PROG);
     id = jj_consume_token(IDENT);
     label_1:
@@ -114,11 +118,12 @@ classDecls.add(classDecl);
         jj_la1[2] = jj_gen;
         break label_2;
       }
-      MethodDecl();
+      method = MethodDecl();
+methods.add(method);
     }
     jj_consume_token(44);
     jj_consume_token(0);
-{if ("" != null) return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls);}
+{if ("" != null) return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls, methods);}
     throw new Error("Missing return statement in function");
 }
 

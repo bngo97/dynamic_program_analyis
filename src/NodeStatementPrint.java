@@ -10,7 +10,9 @@ public class NodeStatementPrint extends NodeStatement {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        expression.accept(v);
+        v.visitEnd(this);
     }
 
     @Override

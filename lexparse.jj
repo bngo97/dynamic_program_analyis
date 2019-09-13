@@ -25,6 +25,8 @@ public class MyParser
         }
         try {
             NodeProg p = parser.Prog();
+            Visitor v = new MyVisitor();
+            p.accept(v);
 //            for(NodeConstDecl n : p.constDecls) {
 //                System.out.println(n);
 //            }
@@ -34,9 +36,9 @@ public class MyParser
 //            for(NodeVarDecl n : p.varDecls) {
 //                System.out.println(n);
 //            }
-            for(NodeClassDecl n : p.classDecls) {
-                System.out.println(n);
-            }
+//            for(NodeClassDecl n : p.classDecls) {
+//                System.out.println(n);
+//            }
             System.out.println("Success!");
         } catch(Exception e) {
             System.out.println("Syntax check failed:");
@@ -108,6 +110,8 @@ NodeProg Prog(): {
     List<NodeVarDecl> varDecl = null;
     List<NodeClassDecl> classDecls = new ArrayList<NodeClassDecl>();
     NodeClassDecl classDecl = null;
+    List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
+    NodeMethodDecl method = null;
 } {
     <PROG> id=<IDENT>
     (
@@ -119,11 +123,11 @@ NodeProg Prog(): {
      )*
     "{"
     (
-        MethodDecl()
+        method=MethodDecl() { methods.add(method); }
     )*
     "}" <EOF>
     {
-        return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls);
+        return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls, methods);
     }
 }
 

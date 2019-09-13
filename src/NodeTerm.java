@@ -10,7 +10,11 @@ public class NodeTerm extends Node {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeFactor factor : factors) {
+            factor.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override
