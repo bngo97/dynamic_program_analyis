@@ -117,7 +117,6 @@ NodeProg Prog(): {
         classDecl=ClassDecl() { classDecls.add(classDecl); } |
         InterfaceDecl()
      )*
-
     "{"
     (
         MethodDecl()
@@ -216,19 +215,29 @@ NodeMethodDecl MethodDecl(): {
 String Type(): {Token id;} { id=<IDENT> { return id.image; } }
 
 NodeStatement Statement(): {
-    NodeStatement statement = null;
+    NodeStatement statement1 = null;
+    NodeStatement statement2 = null;
+    NodeStatement statement3 = null;
+    NodeCondition condition = null;
+    NodeExpr expression = null;
 } {
-    (statement=DesignatorStatement() ";" { return statement; } ) |
-    (<IF> "(" Condition() ")" Statement() [<ELSE> Statement()]) |
-    (<FOR> "(" [DesignatorStatement()] ";" [Condition()] ";" [DesignatorStatement()] ")" Statement()) |
-    (<BREAK> ";") |
-    (<CONTINUE> ";") |
-    (<RETURN> [Expr()] ";") |
+    (statement1=DesignatorStatement() ";" { return statement1; } ) |
+    (<IF> "(" condition=Condition() ")" statement1=Statement() [<ELSE> statement2=Statement()]
+    {
+        return new NodeStatementIf(condition, statement1, statement2);
+    }) |
+    (<FOR> "(" [statement1=DesignatorStatement()] ";" [condition=Condition()] ";" [statement2=DesignatorStatement()] ")" statement3=Statement()
+    {
+        return new NodeStatementFor(statement1, condition, statement2, statement3);
+    }) |
+    (<BREAK> ";" { return new NodeStatementNoOp(); }) |
+    (<CONTINUE> ";" { return new NodeStatementNoOp(); }) |
+    (<RETURN> [expression=Expr()] ";" { return new NodeStatementReturn(expression); }) |
     (<READ> "(" Designator() ")" ";") |
     (<PRINT> "(" Expr() ["," <NUM>] ")" ";") |
     ("{" (Statement())* "}")
     {
-        return statement;
+        return statement1;
     }
 }
 

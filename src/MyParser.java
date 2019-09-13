@@ -551,30 +551,35 @@ statements.add(statement);
     throw new Error("Missing return statement in function");
 }
 
-  static final public NodeStatement Statement() throws ParseException {NodeStatement statement = null;
+  static final public NodeStatement Statement() throws ParseException {NodeStatement statement1 = null;
+    NodeStatement statement2 = null;
+    NodeStatement statement3 = null;
+    NodeCondition condition = null;
+    NodeExpr expression = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      statement = DesignatorStatement();
+      statement1 = DesignatorStatement();
       jj_consume_token(46);
-{if ("" != null) return statement;}
+{if ("" != null) return statement1;}
       break;
       }
     case IF:{
       jj_consume_token(IF);
       jj_consume_token(49);
-      Condition();
+      condition = Condition();
       jj_consume_token(50);
-      Statement();
+      statement1 = Statement();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case ELSE:{
         jj_consume_token(ELSE);
-        Statement();
+        statement2 = Statement();
         break;
         }
       default:
         jj_la1[28] = jj_gen;
         ;
       }
+{if ("" != null) return new NodeStatementIf(condition, statement1, statement2);}
       break;
       }
     case FOR:{
@@ -582,7 +587,7 @@ statements.add(statement);
       jj_consume_token(49);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENT:{
-        DesignatorStatement();
+        statement1 = DesignatorStatement();
         break;
         }
       default:
@@ -597,7 +602,7 @@ statements.add(statement);
       case BOOL:
       case CHAR:
       case IDENT:{
-        Condition();
+        condition = Condition();
         break;
         }
       default:
@@ -607,7 +612,7 @@ statements.add(statement);
       jj_consume_token(46);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case IDENT:{
-        DesignatorStatement();
+        statement2 = DesignatorStatement();
         break;
         }
       default:
@@ -615,17 +620,20 @@ statements.add(statement);
         ;
       }
       jj_consume_token(50);
-      Statement();
+      statement3 = Statement();
+{if ("" != null) return new NodeStatementFor(statement1, condition, statement2, statement3);}
       break;
       }
     case BREAK:{
       jj_consume_token(BREAK);
       jj_consume_token(46);
+{if ("" != null) return new NodeStatementNoOp();}
       break;
       }
     case CONTINUE:{
       jj_consume_token(CONTINUE);
       jj_consume_token(46);
+{if ("" != null) return new NodeStatementNoOp();}
       break;
       }
     case RETURN:{
@@ -637,7 +645,7 @@ statements.add(statement);
       case BOOL:
       case CHAR:
       case IDENT:{
-        Expr();
+        expression = Expr();
         break;
         }
       default:
@@ -645,6 +653,7 @@ statements.add(statement);
         ;
       }
       jj_consume_token(46);
+{if ("" != null) return new NodeStatementReturn(expression);}
       break;
       }
     case READ:{
@@ -697,7 +706,7 @@ statements.add(statement);
         Statement();
       }
       jj_consume_token(44);
-{if ("" != null) return statement;}
+{if ("" != null) return statement1;}
       break;
       }
     default:
