@@ -1,0 +1,19 @@
+program P
+
+int z;
+
+class Class {
+	{
+		void multiply(int x, int y) char c, p; {
+			z = x * y;
+		}
+
+		int idk() {
+			z[x + 1] = 1;
+		}		
+
+	}	
+}
+{
+	void main() {}
+}

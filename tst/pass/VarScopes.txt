@@ -1,0 +1,21 @@
+program P
+
+int a;
+
+class Class {
+	int b;
+	{
+		void add(int c) int d; {
+			d = b + c;
+			a--;
+			return;
+		}
+	}
+}
+
+{
+	void main() { 
+		print(a); 
+		return;
+	}
+} 

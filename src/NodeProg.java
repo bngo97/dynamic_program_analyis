@@ -5,6 +5,7 @@ public class NodeProg extends NodeDecl {
     List<NodeConstDecl> constDecls;
     List<NodeEnumDecl> enumDecls;
     List<NodeVarDecl> varDecls;
+    List<NodeInterfaceDecl> interfaces;
     List<NodeClassDecl> classDecls;
     List<NodeMethodDecl> methods;
 
@@ -13,6 +14,7 @@ public class NodeProg extends NodeDecl {
             List<NodeConstDecl> constDecls,
             List<NodeEnumDecl> enumDecls,
             List<NodeVarDecl> varDecls,
+            List<NodeInterfaceDecl> interfaces,
             List<NodeClassDecl> classDecls,
             List<NodeMethodDecl> methods
         ) {
@@ -20,6 +22,7 @@ public class NodeProg extends NodeDecl {
         this.constDecls = constDecls;
         this.enumDecls = enumDecls;
         this.varDecls = varDecls;
+        this.interfaces = interfaces;
         this.classDecls = classDecls;
         this.methods = methods;
     }

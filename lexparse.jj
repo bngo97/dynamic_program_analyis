@@ -11,8 +11,8 @@ import java.util.HashMap;
 public class MyParser
 {
     public static void main(String[] args) throws FileNotFoundException {
-        if(args.length != 2) {
-            throw new RuntimeException("Incorrect command arguments");
+        if(args.length < 2 || args.length > 3) {
+            throw new RuntimeException("Incorrect # of command arguments");
         }
         MyParser parser;
         if(args[0].equals("-t")) {
@@ -27,18 +27,6 @@ public class MyParser
             NodeProg ast = parser.Prog();
             Visitor v = new MyVisitor();
             ast.accept(v);
-//            for(NodeConstDecl n : p.constDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeEnumDecl n : p.enumDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeVarDecl n : p.varDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeClassDecl n : p.classDecls) {
-//                System.out.println(n);
-//            }
             System.out.println("Success!");
         } catch(ParseException e) {
             System.out.println("Failure Parsing!");
@@ -115,6 +103,8 @@ NodeProg Prog(): {
     NodeClassDecl classDecl = null;
     List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
     NodeMethodDecl method = null;
+    List<NodeInterfaceDecl> interfaces = new ArrayList<NodeInterfaceDecl>();
+    NodeInterfaceDecl interf = null;
 } {
     <PROG> id=<IDENT>
     (
@@ -122,7 +112,7 @@ NodeProg Prog(): {
         enumDecl=EnumDecl() { enumDecls.add(enumDecl); } |
         varDecl=VarDecl() { varDecls.addAll(varDecl); } |
         classDecl=ClassDecl() { classDecls.add(classDecl); } |
-        InterfaceDecl()
+        interf=InterfaceDecl() { interfaces.add(interf); }
      )*
     "{"
     (
@@ -130,7 +120,7 @@ NodeProg Prog(): {
     )*
     "}" <EOF>
     {
-        return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls, methods);
+        return new NodeProg(id.image, constDecls, enumDecls, varDecls, interfaces, classDecls, methods);
     }
 }
 
@@ -166,9 +156,25 @@ List<NodeVarDecl> VarDecl(): {
     }
 }
 
-void InterfaceDecl(): {} { <INTERFACE> <IDENT> "{" (InterfaceMethodDecl())* "}" }
+NodeInterfaceDecl InterfaceDecl(): {
+    Token id;
+    List<NodeInterfaceMethodDecl> methods = new ArrayList<NodeInterfaceMethodDecl>();
+    NodeInterfaceMethodDecl method = null;
+} { <INTERFACE> id=<IDENT> "{" (method=InterfaceMethodDecl() { methods.add(method); })* "}"
+    {
+        return new NodeInterfaceDecl(id.image, methods);
+    }
+}
 
-void InterfaceMethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" ";"}
+NodeInterfaceMethodDecl InterfaceMethodDecl(): {
+    Token id;
+    String returnType = null;
+    Map<String, String> formPars = null;
+} { (returnType=Type() | <VOID> { if(returnType == null) returnType = "void"; }) id=<IDENT> "(" [formPars=FormPars()] ")" ";"
+    {
+        return new NodeInterfaceMethodDecl(id.image, returnType, formPars);
+    }
+}
 
 Map<String,String> FormPars(): {
     Map<String,String> formPars = new HashMap<String,String>();

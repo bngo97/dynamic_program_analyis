@@ -104,4 +104,12 @@ abstract class Visitor {
 
     public abstract void visitEnd(NodeVarDecl node);
 
+    public abstract void visit(NodeInterfaceDecl node);
+
+    public abstract void visitEnd(NodeInterfaceDecl node);
+
+    public abstract void visit(NodeInterfaceMethodDecl node);
+
+    public abstract void visitEnd(NodeInterfaceMethodDecl node);
+
 }

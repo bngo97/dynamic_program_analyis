@@ -11,8 +11,8 @@ import java.util.HashMap;
 
 public class MyParser implements MyParserConstants {
     public static void main(String[] args) throws FileNotFoundException {
-        if(args.length != 2) {
-            throw new RuntimeException("Incorrect command arguments");
+        if(args.length < 2 || args.length > 3) {
+            throw new RuntimeException("Incorrect # of command arguments");
         }
         MyParser parser;
         if(args[0].equals("-t")) {
@@ -27,18 +27,6 @@ public class MyParser implements MyParserConstants {
             NodeProg ast = parser.Prog();
             Visitor v = new MyVisitor();
             ast.accept(v);
-//            for(NodeConstDecl n : p.constDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeEnumDecl n : p.enumDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeVarDecl n : p.varDecls) {
-//                System.out.println(n);
-//            }
-//            for(NodeClassDecl n : p.classDecls) {
-//                System.out.println(n);
-//            }
             System.out.println("Success!");
         } catch(ParseException e) {
             System.out.println("Failure Parsing!");
@@ -60,6 +48,8 @@ public class MyParser implements MyParserConstants {
     NodeClassDecl classDecl = null;
     List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
     NodeMethodDecl method = null;
+    List<NodeInterfaceDecl> interfaces = new ArrayList<NodeInterfaceDecl>();
+    NodeInterfaceDecl interf = null;
     jj_consume_token(PROG);
     id = jj_consume_token(IDENT);
     label_1:
@@ -99,7 +89,8 @@ classDecls.add(classDecl);
         break;
         }
       case INTERFACE:{
-        InterfaceDecl();
+        interf = InterfaceDecl();
+interfaces.add(interf);
         break;
         }
       default:
@@ -126,7 +117,7 @@ methods.add(method);
     }
     jj_consume_token(44);
     jj_consume_token(0);
-{if ("" != null) return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls, methods);}
+{if ("" != null) return new NodeProg(id.image, constDecls, enumDecls, varDecls, interfaces, classDecls, methods);}
     throw new Error("Missing return statement in function");
 }
 
@@ -289,9 +280,11 @@ decls.add(new NodeVarDecl(t, id.image));
     throw new Error("Missing return statement in function");
 }
 
-  static final public void InterfaceDecl() throws ParseException {
+  static final public NodeInterfaceDecl InterfaceDecl() throws ParseException {Token id;
+    List<NodeInterfaceMethodDecl> methods = new ArrayList<NodeInterfaceMethodDecl>();
+    NodeInterfaceMethodDecl method = null;
     jj_consume_token(INTERFACE);
-    jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     jj_consume_token(43);
     label_6:
     while (true) {
@@ -305,19 +298,25 @@ decls.add(new NodeVarDecl(t, id.image));
         jj_la1[12] = jj_gen;
         break label_6;
       }
-      InterfaceMethodDecl();
+      method = InterfaceMethodDecl();
+methods.add(method);
     }
     jj_consume_token(44);
+{if ("" != null) return new NodeInterfaceDecl(id.image, methods);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void InterfaceMethodDecl() throws ParseException {
+  static final public NodeInterfaceMethodDecl InterfaceMethodDecl() throws ParseException {Token id;
+    String returnType = null;
+    Map<String, String> formPars = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      Type();
+      returnType = Type();
       break;
       }
     case VOID:{
       jj_consume_token(VOID);
+if(returnType == null) returnType = "void";
       break;
       }
     default:
@@ -325,11 +324,11 @@ decls.add(new NodeVarDecl(t, id.image));
       jj_consume_token(-1);
       throw new ParseException();
     }
-    jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     jj_consume_token(49);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      FormPars();
+      formPars = FormPars();
       break;
       }
     default:
@@ -338,6 +337,8 @@ decls.add(new NodeVarDecl(t, id.image));
     }
     jj_consume_token(50);
     jj_consume_token(46);
+{if ("" != null) return new NodeInterfaceMethodDecl(id.image, returnType, formPars);}
+    throw new Error("Missing return statement in function");
 }
 
   static final public Map<String,String> FormPars() throws ParseException {Map<String,String> formPars = new HashMap<String,String>();

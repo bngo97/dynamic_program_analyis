@@ -1,4 +1,5 @@
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class MyVisitor extends Visitor {
@@ -10,6 +11,9 @@ public class MyVisitor extends Visitor {
     Set<String> globalVars;
     Set<String> classVars;
     Set<String> localVars;
+
+    Map<String, Set<String>> declaredClasses;
+
 
     public MyVisitor() {
         globalVars = new HashSet<>();
@@ -75,10 +79,12 @@ public class MyVisitor extends Visitor {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in class scope already!");
             }
         }
+        classVars.add("this");
     }
 
     @Override
     public void visitEnd(NodeClassDecl node) {
+        System.out.println("WTF");
         classVars = new HashSet<>();
     }
 
@@ -124,6 +130,8 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeDesignator node) {
+        System.out.println(node.ids);
+        System.out.println("class vars = " + classVars);
         for(String id : node.ids) {
             if(!globalVars.contains(id) && !classVars.contains(id) && !localVars.contains(id)) {
                 throw new RuntimeException("Variable \"" + id + "\" used but not declared");
@@ -366,6 +374,26 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visitEnd(NodeVarDecl node) {
+
+    }
+
+    @Override
+    public void visit(NodeInterfaceDecl node) {
+
+    }
+
+    @Override
+    public void visitEnd(NodeInterfaceDecl node) {
+
+    }
+
+    @Override
+    public void visit(NodeInterfaceMethodDecl node) {
+
+    }
+
+    @Override
+    public void visitEnd(NodeInterfaceMethodDecl node) {
 
     }
 }
