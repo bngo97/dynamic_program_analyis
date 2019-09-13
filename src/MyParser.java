@@ -4,6 +4,10 @@ import java.io.StringReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MyParser implements MyParserConstants {
     public static void main(String[] args) throws FileNotFoundException {
@@ -21,7 +25,18 @@ public class MyParser implements MyParserConstants {
         }
         try {
             NodeProg p = parser.Prog();
-            System.out.println(p.name);
+//            for(NodeConstDecl n : p.constDecls) {
+//                System.out.println(n);
+//            }
+//            for(NodeEnumDecl n : p.enumDecls) {
+//                System.out.println(n);
+//            }
+//            for(NodeVarDecl n : p.varDecls) {
+//                System.out.println(n);
+//            }
+            for(NodeClassDecl n : p.classDecls) {
+                System.out.println(n);
+            }
             System.out.println("Success!");
         } catch(Exception e) {
             System.out.println("Syntax check failed:");
@@ -29,10 +44,17 @@ public class MyParser implements MyParserConstants {
         }
     }
 
-  static final public NodeProg Prog() throws ParseException {Token n;
-    NodeProg p;
+  static final public NodeProg Prog() throws ParseException {Token id;
+    List<NodeConstDecl> constDecls = new ArrayList<NodeConstDecl>();
+    List<NodeConstDecl> constDecl = null;
+    List<NodeEnumDecl> enumDecls = new ArrayList<NodeEnumDecl>();
+    NodeEnumDecl enumDecl = null;
+    List<NodeVarDecl> varDecls = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> varDecl = null;
+    List<NodeClassDecl> classDecls = new ArrayList<NodeClassDecl>();
+    NodeClassDecl classDecl = null;
     jj_consume_token(PROG);
-    n = jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -50,19 +72,23 @@ public class MyParser implements MyParserConstants {
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case CONST:{
-        ConstDecl();
+        constDecl = ConstDecl();
+constDecls.addAll(constDecl);
         break;
         }
       case ENUM:{
-        EnumDecl();
+        enumDecl = EnumDecl();
+enumDecls.add(enumDecl);
         break;
         }
       case IDENT:{
-        VarDecl();
+        varDecl = VarDecl();
+varDecls.addAll(varDecl);
         break;
         }
       case CLASS:{
-        ClassDecl();
+        classDecl = ClassDecl();
+classDecls.add(classDecl);
         break;
         }
       case INTERFACE:{
@@ -92,26 +118,28 @@ public class MyParser implements MyParserConstants {
     }
     jj_consume_token(44);
     jj_consume_token(0);
-{if ("" != null) return new NodeProg(n.image);}
+{if ("" != null) return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls);}
     throw new Error("Missing return statement in function");
 }
 
-  static final public void ConstDecl() throws ParseException {
+  static final public List<NodeConstDecl> ConstDecl() throws ParseException {List<NodeConstDecl> decls = new ArrayList<NodeConstDecl>();
+    Token n, v;
+    String t;
     jj_consume_token(CONST);
-    Type();
-    jj_consume_token(IDENT);
+    t = Type();
+    n = jj_consume_token(IDENT);
     jj_consume_token(EQ);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case NUM:{
-      jj_consume_token(NUM);
+      v = jj_consume_token(NUM);
       break;
       }
     case BOOL:{
-      jj_consume_token(BOOL);
+      v = jj_consume_token(BOOL);
       break;
       }
     case CHAR:{
-      jj_consume_token(CHAR);
+      v = jj_consume_token(CHAR);
       break;
       }
     default:
@@ -119,6 +147,7 @@ public class MyParser implements MyParserConstants {
       jj_consume_token(-1);
       throw new ParseException();
     }
+decls.add(new NodeConstDecl(t, n.image, v.image));
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -131,19 +160,19 @@ public class MyParser implements MyParserConstants {
         break label_3;
       }
       jj_consume_token(45);
-      jj_consume_token(IDENT);
+      n = jj_consume_token(IDENT);
       jj_consume_token(EQ);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case NUM:{
-        jj_consume_token(NUM);
+        v = jj_consume_token(NUM);
         break;
         }
       case BOOL:{
-        jj_consume_token(BOOL);
+        v = jj_consume_token(BOOL);
         break;
         }
       case CHAR:{
-        jj_consume_token(CHAR);
+        v = jj_consume_token(CHAR);
         break;
         }
       default:
@@ -151,25 +180,31 @@ public class MyParser implements MyParserConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
+decls.add(new NodeConstDecl(t, n.image, v.image));
     }
     jj_consume_token(46);
+{if ("" != null) return decls;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void EnumDecl() throws ParseException {
+  static final public NodeEnumDecl EnumDecl() throws ParseException {Token id;
+    Token key = null, val = null;
+    Map<String, String> vals = new HashMap<String, String>();
     jj_consume_token(ENUM);
-    jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     jj_consume_token(43);
-    jj_consume_token(IDENT);
+    key = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQ:{
       jj_consume_token(EQ);
-      jj_consume_token(NUM);
+      val = jj_consume_token(NUM);
       break;
       }
     default:
       jj_la1[6] = jj_gen;
       ;
     }
+vals.put(key.image, val == null ? null : val.image); val = null;
     label_4:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -182,24 +217,29 @@ public class MyParser implements MyParserConstants {
         break label_4;
       }
       jj_consume_token(45);
-      jj_consume_token(IDENT);
+      key = jj_consume_token(IDENT);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case EQ:{
         jj_consume_token(EQ);
-        jj_consume_token(NUM);
+        val = jj_consume_token(NUM);
         break;
         }
       default:
         jj_la1[8] = jj_gen;
         ;
       }
+vals.put(key.image, val == null ? null : val.image); val = null;
     }
     jj_consume_token(44);
+{if ("" != null) return new NodeEnumDecl(id.image, vals);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void VarDecl() throws ParseException {
-    Type();
-    jj_consume_token(IDENT);
+  static final public List<NodeVarDecl> VarDecl() throws ParseException {List<NodeVarDecl> decls = new ArrayList<NodeVarDecl>();
+    String t;
+    Token id;
+    t = Type();
+    id = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 47:{
       jj_consume_token(47);
@@ -210,6 +250,7 @@ public class MyParser implements MyParserConstants {
       jj_la1[9] = jj_gen;
       ;
     }
+decls.add(new NodeVarDecl(t, id.image));
     label_5:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -222,7 +263,7 @@ public class MyParser implements MyParserConstants {
         break label_5;
       }
       jj_consume_token(45);
-      jj_consume_token(IDENT);
+      id = jj_consume_token(IDENT);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 47:{
         jj_consume_token(47);
@@ -233,8 +274,11 @@ public class MyParser implements MyParserConstants {
         jj_la1[11] = jj_gen;
         ;
       }
+decls.add(new NodeVarDecl(t, id.image));
     }
     jj_consume_token(46);
+{if ("" != null) return decls;}
+    throw new Error("Missing return statement in function");
 }
 
   static final public void InterfaceDecl() throws ParseException {
@@ -328,13 +372,18 @@ public class MyParser implements MyParserConstants {
     }
 }
 
-  static final public void ClassDecl() throws ParseException {
+  static final public NodeClassDecl ClassDecl() throws ParseException {Token id;
+    String parent = null;
+    String impl = null;
+    List<String> impls = new ArrayList<String>();
+    List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> var = null;
     jj_consume_token(CLASS);
-    jj_consume_token(IDENT);
+    id = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EXTENDS:{
       jj_consume_token(EXTENDS);
-      Type();
+      parent = Type();
       break;
       }
     default:
@@ -344,7 +393,8 @@ public class MyParser implements MyParserConstants {
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IMPLEMENTS:{
       jj_consume_token(IMPLEMENTS);
-      Type();
+      impl = Type();
+impls.add(impl);
       label_8:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -357,7 +407,8 @@ public class MyParser implements MyParserConstants {
           break label_8;
         }
         jj_consume_token(45);
-        Type();
+        impl = Type();
+impls.add(impl);
       }
       break;
       }
@@ -377,7 +428,8 @@ public class MyParser implements MyParserConstants {
         jj_la1[21] = jj_gen;
         break label_9;
       }
-      VarDecl();
+      var = VarDecl();
+vars.addAll(var);
     }
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 43:{
@@ -404,6 +456,8 @@ public class MyParser implements MyParserConstants {
       ;
     }
     jj_consume_token(44);
+{if ("" != null) return new NodeClassDecl(id.image, parent, impls, vars);}
+    throw new Error("Missing return statement in function");
 }
 
   static final public void MethodDecl() throws ParseException {
@@ -471,8 +525,10 @@ public class MyParser implements MyParserConstants {
     jj_consume_token(44);
 }
 
-  static final public void Type() throws ParseException {
-    jj_consume_token(IDENT);
+  static final public String Type() throws ParseException {Token id;
+    id = jj_consume_token(IDENT);
+{if ("" != null) return id.image;}
+    throw new Error("Missing return statement in function");
 }
 
   static final public void Statement() throws ParseException {

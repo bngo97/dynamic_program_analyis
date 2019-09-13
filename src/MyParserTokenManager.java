@@ -4,6 +4,10 @@ import java.io.StringReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /** Token Manager. */
 public class MyParserTokenManager implements MyParserConstants {

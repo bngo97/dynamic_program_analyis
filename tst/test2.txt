@@ -1,4 +1,21 @@
 program P
 	const int a = 10;
+	const char b = 'b', c = 'c', d = 10;
+	enum e {
+		a,
+		b=10,
+		c,
+		d=20
+	}
+	enum e2 {
+		e,f
+	}
+	int g, h;
+	char i, j;
+	class a extends b implements c, d {
+		int a, b;
+		char c, d;
+		{}
+	}
 {
 } 

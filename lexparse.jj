@@ -3,6 +3,10 @@ import java.io.StringReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MyParser
 {
@@ -21,7 +25,18 @@ public class MyParser
         }
         try {
             NodeProg p = parser.Prog();
-            System.out.println(p.name);
+//            for(NodeConstDecl n : p.constDecls) {
+//                System.out.println(n);
+//            }
+//            for(NodeEnumDecl n : p.enumDecls) {
+//                System.out.println(n);
+//            }
+//            for(NodeVarDecl n : p.varDecls) {
+//                System.out.println(n);
+//            }
+            for(NodeClassDecl n : p.classDecls) {
+                System.out.println(n);
+            }
             System.out.println("Success!");
         } catch(Exception e) {
             System.out.println("Syntax check failed:");
@@ -84,32 +99,66 @@ TOKEN: { <CHAR: "'"[" " - "~"]"'">}
 TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
 
 NodeProg Prog(): {
-    Token n;
-    NodeProg p;
+    Token id;
+    List<NodeConstDecl> constDecls = new ArrayList<NodeConstDecl>();
+    List<NodeConstDecl> constDecl = null;
+    List<NodeEnumDecl> enumDecls = new ArrayList<NodeEnumDecl>();
+    NodeEnumDecl enumDecl = null;
+    List<NodeVarDecl> varDecls = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> varDecl = null;
+    List<NodeClassDecl> classDecls = new ArrayList<NodeClassDecl>();
+    NodeClassDecl classDecl = null;
 } {
-    <PROG> n=<IDENT>
+    <PROG> id=<IDENT>
     (
-        ConstDecl() |
-        EnumDecl() |
-        VarDecl() |
-        ClassDecl() |
+        constDecl=ConstDecl() { constDecls.addAll(constDecl); } |
+        enumDecl=EnumDecl() { enumDecls.add(enumDecl); } |
+        varDecl=VarDecl() { varDecls.addAll(varDecl); } |
+        classDecl=ClassDecl() { classDecls.add(classDecl); } |
         InterfaceDecl()
      )*
+
     "{"
     (
         MethodDecl()
     )*
     "}" <EOF>
     {
-        return new NodeProg(n.image);
+        return new NodeProg(id.image, constDecls, enumDecls, varDecls, classDecls);
     }
 }
 
-NodeConstDecl ConstDecl(): {} { <CONST> Type() <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ) ("," <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ))* ";" }
+List<NodeConstDecl> ConstDecl(): {
+    List<NodeConstDecl> decls = new ArrayList<NodeConstDecl>();
+    Token n, v;
+    String t;
+} {
+    <CONST> t=Type() n=<IDENT> <EQ> ( v=<NUM> | v=<BOOL> | v=<CHAR> ) { decls.add(new NodeConstDecl(t, n.image, v.image)); }
+    ("," n=<IDENT> <EQ> ( v=<NUM> | v=<BOOL> | v=<CHAR> ) { decls.add(new NodeConstDecl(t, n.image, v.image)); })* ";"
+    {
+        return decls;
+    }
+}
 
-void EnumDecl(): {} { <ENUM> <IDENT> "{" <IDENT> [<EQ><NUM>] ("," <IDENT> [<EQ><NUM>])*"}" }
+NodeEnumDecl EnumDecl(): {
+    Token id;
+    Token key = null, val = null;
+    Map<String, String> vals = new HashMap<String, String>();
+} { <ENUM> id=<IDENT> "{" key=<IDENT> [<EQ> val=<NUM>] {vals.put(key.image, val == null ? null : val.image); val = null;} ("," key=<IDENT> [<EQ> val=<NUM>] {vals.put(key.image, val == null ? null : val.image); val = null;})*"}"
+    {
+        return new NodeEnumDecl(id.image, vals);
+    }
+}
 
-void VarDecl(): {} { Type() <IDENT> ["[" "]"] ("," <IDENT> ["[" "]"])* ";" }
+List<NodeVarDecl> VarDecl(): {
+    List<NodeVarDecl> decls = new ArrayList<NodeVarDecl>();
+    String t;
+    Token id;
+} { t=Type() id=<IDENT> ["[" "]"] { decls.add(new NodeVarDecl(t, id.image)); } ("," id=<IDENT> ["[" "]"] { decls.add(new NodeVarDecl(t, id.image)); } )* ";"
+    {
+        return decls;
+    }
+}
 
 void InterfaceDecl(): {} { <INTERFACE> <IDENT> "{" (InterfaceMethodDecl())* "}" }
 
@@ -117,11 +166,28 @@ void InterfaceMethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" 
 
 void FormPars(): {} { Type() <IDENT> ["[" "]"] ("," Type() <IDENT> ["[" "]"])* }
 
-void ClassDecl(): {} { <CLASS> <IDENT> [<EXTENDS> Type()] [<IMPLEMENTS> Type() ("," Type())* ] "{" (VarDecl())* ["{" (MethodDecl())* "}"] "}"}
+NodeClassDecl ClassDecl(): {
+    Token id;
+    String parent = null;
+    String impl = null;
+    List<String> impls = new ArrayList<String>();
+    List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> var = null;
+} { <CLASS> id=<IDENT> [<EXTENDS> parent=Type()] [<IMPLEMENTS> impl=Type() { impls.add(impl); } ("," impl=Type() { impls.add(impl); })* ]
+    "{"
+        (var=VarDecl() { vars.addAll(var); } )*
+    ["{"
+        (MethodDecl())*
+    "}"]
+    "}"
+    {
+        return new NodeClassDecl(id.image, parent, impls, vars);
+    }
+}
 
 void MethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" (VarDecl())* "{" (Statement())* "}"}
 
-void Type(): {} { <IDENT> }
+String Type(): {Token id;} { id=<IDENT> { return id.image; } }
 
 void Statement(): {} {
     (DesignatorStatement() ";") |
