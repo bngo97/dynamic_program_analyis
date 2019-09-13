@@ -44,6 +44,4 @@ program P
 
 	void main() int a, b; {}
 
-	void main() {}
-
 } 

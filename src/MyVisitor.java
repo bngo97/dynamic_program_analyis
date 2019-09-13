@@ -3,15 +3,19 @@ import java.util.Set;
 
 public class MyVisitor extends Visitor {
 
-    Set<String> declaredVars;
+    // We use sets because we do not care about value
+    // We only care about declaration of variables
+    Set<String> globalVars;
+    Set<String> localVars;
 
     public MyVisitor() {
-        declaredVars = new HashSet<>();
+        globalVars = new HashSet<>();
+        localVars = new HashSet<>();
     }
 
     @Override
     public void visit(NodeProg node) {
-        System.out.println("THIS IS BRENDAN");
+        // Check methods defined in program
         boolean isMainMethod = false;
         for(NodeMethodDecl method : node.methods) {
             if(method.id.equals("main") && method.returnType.equals("void") && method.formPars.size() == 0) {
@@ -182,7 +186,7 @@ public class MyVisitor extends Visitor {
     public void visitEnd(NodeMethodDecl node) {
 
     }
-
+    
     @Override
     public void visit(NodeStatement node) {
         if(node instanceof NodeStatementDesignator) {
