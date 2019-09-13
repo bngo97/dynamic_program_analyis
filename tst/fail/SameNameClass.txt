@@ -1,0 +1,11 @@
+program P
+
+class Class {
+	int a;
+	char a;
+	{
+	}
+}
+{
+	void main() {}
+}

@@ -1,0 +1,6 @@
+program P
+	const int a = 10;
+	char a;
+{
+	void main() {}
+} 

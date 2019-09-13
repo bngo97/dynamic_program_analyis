@@ -1,0 +1,7 @@
+program P
+{
+	int add(int a, int b) char a; {
+		return a + b;
+	}
+	void main() {}
+}

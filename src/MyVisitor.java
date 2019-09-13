@@ -5,11 +5,15 @@ public class MyVisitor extends Visitor {
 
     // We use sets because we do not care about value
     // We only care about declaration of variables
+    // There are 3 types of scopes: global, class, and local/method
+    // We use 3 sets to make sure there is no overlap in scope names
     Set<String> globalVars;
+    Set<String> classVars;
     Set<String> localVars;
 
     public MyVisitor() {
         globalVars = new HashSet<>();
+        classVars = new HashSet<>();
         localVars = new HashSet<>();
     }
 
@@ -27,6 +31,25 @@ public class MyVisitor extends Visitor {
         }
         if(!isMainMethod) {
             throw new RuntimeException("No main method declared in program!");
+        }
+        // Set globally defined variables
+        for(NodeConstDecl constDecl : node.constDecls) {
+            if(!globalVars.add(constDecl.id)) {
+                throw new RuntimeException("Variable name \"" + constDecl.id + "\" exists in global scope already!");
+            }
+        }
+        for(NodeVarDecl var : node.varDecls) {
+            if(!globalVars.add(var.id)) {
+                throw new RuntimeException("Variable name \"" + var.id + "\" exists in global scope already!");
+            }
+        }
+        // Assuming enum ids are global variables also
+        for(NodeEnumDecl enumDecl : node.enumDecls) {
+            for(String id : enumDecl.vals.keySet()) {
+                if(!globalVars.add(id)) {
+                    throw new RuntimeException("Variable name \"" + id + "\" exists in global scope already!");
+                }
+            }
         }
     }
 
@@ -47,12 +70,16 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeClassDecl node) {
-
+        for(NodeVarDecl var : node.vars) {
+            if(!classVars.add(var.id)) {
+                throw new RuntimeException("Variable name \"" + var.id + "\" exists in class scope already!");
+            }
+        }
     }
 
     @Override
     public void visitEnd(NodeClassDecl node) {
-
+        classVars = new HashSet<>();
     }
 
     @Override
@@ -97,7 +124,11 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeDesignator node) {
-
+        for(String id : node.ids) {
+            if(!globalVars.contains(id) && !classVars.contains(id) && !localVars.contains(id)) {
+                throw new RuntimeException("Variable \"" + id + "\" used but not declared");
+            }
+        }
     }
 
     @Override
@@ -179,14 +210,23 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeMethodDecl node) {
-
+        for(String id : node.formPars.keySet()) {
+            if(!localVars.add(id)) {
+                throw new RuntimeException("Variable name \"" + id + "\" exists in local scope already!");
+            }
+        }
+        for(NodeVarDecl var : node.vars) {
+            if (!localVars.add(var.id)) {
+                throw new RuntimeException("Variable name \"" + var.id + "\" exists in local scope already!");
+            }
+        }
     }
 
     @Override
     public void visitEnd(NodeMethodDecl node) {
-
+        localVars = new HashSet<>();
     }
-    
+
     @Override
     public void visit(NodeStatement node) {
         if(node instanceof NodeStatementDesignator) {

@@ -24,9 +24,9 @@ public class MyParser implements MyParserConstants {
             throw new RuntimeException("Incorrect input flag");
         }
         try {
-            NodeProg p = parser.Prog();
+            NodeProg ast = parser.Prog();
             Visitor v = new MyVisitor();
-            p.accept(v);
+            ast.accept(v);
 //            for(NodeConstDecl n : p.constDecls) {
 //                System.out.println(n);
 //            }
@@ -40,8 +40,11 @@ public class MyParser implements MyParserConstants {
 //                System.out.println(n);
 //            }
             System.out.println("Success!");
-        } catch(Exception e) {
-            System.out.println("Syntax check failed:");
+        } catch(ParseException e) {
+            System.out.println("Failure Parsing!");
+            System.out.println(e.getMessage());
+        } catch(RuntimeException e) {
+            System.out.println("Failure Running!");
             System.out.println(e.getMessage());
         }
     }

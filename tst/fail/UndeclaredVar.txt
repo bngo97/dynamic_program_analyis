@@ -1,0 +1,6 @@
+program P
+{
+	void main() {
+		x++;
+	}
+} 

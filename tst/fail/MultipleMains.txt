@@ -1,0 +1,9 @@
+program P
+{
+	void main() {}
+
+	void main() int a, b; {
+		a = b;
+	}
+
+} 

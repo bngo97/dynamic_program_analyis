@@ -89,11 +89,11 @@ public interface MyParserConstants {
   /** Literal token values. */
   String[] tokenImage = {
     "<EOF>",
+    "<token of kind 1>",
     "\" \"",
     "\"\\n\"",
     "\"\\r\"",
     "\"\\t\"",
-    "<token of kind 5>",
     "\"program\"",
     "\"const\"",
     "\"enum\"",

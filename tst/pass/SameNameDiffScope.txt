@@ -1,0 +1,14 @@
+program P
+
+const int a = 1;
+
+class Table {
+	int a[];
+	{
+		int add(int a, int b) { return a + b; }
+	}
+} 
+
+{
+	void main() {}
+}

@@ -14,6 +14,7 @@ public class NodeDesignator extends Node {
     public void accept(Visitor v) {
         v.visit(this);
         for(NodeExpr expression : expressions) {
+            System.out.println("what");
             expression.accept(v);
         }
         v.visitEnd(this);
