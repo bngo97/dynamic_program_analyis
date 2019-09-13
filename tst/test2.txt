@@ -15,7 +15,9 @@ program P
 	class a extends b implements c, d {
 		int a, b;
 		char c, d;
-		{}
+		{
+			void add(int a, int b) int c; {}
+		}
 	}
 {
 } 

@@ -164,7 +164,15 @@ void InterfaceDecl(): {} { <INTERFACE> <IDENT> "{" (InterfaceMethodDecl())* "}" 
 
 void InterfaceMethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" ";"}
 
-void FormPars(): {} { Type() <IDENT> ["[" "]"] ("," Type() <IDENT> ["[" "]"])* }
+Map<String,String> FormPars(): {
+    Map<String,String> formPars = new HashMap<String,String>();
+    String type;
+    Token id;
+} { type=Type() id=<IDENT> { formPars.put(id.image, type); } ["[" "]"] ("," type=Type() id=<IDENT> ["[" "]"] { formPars.put(id.image, type); })*
+    {
+        return formPars;
+    }
+}
 
 NodeClassDecl ClassDecl(): {
     Token id;
@@ -173,19 +181,35 @@ NodeClassDecl ClassDecl(): {
     List<String> impls = new ArrayList<String>();
     List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
     List<NodeVarDecl> var = null;
+    List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
+    NodeMethodDecl method = null;
 } { <CLASS> id=<IDENT> [<EXTENDS> parent=Type()] [<IMPLEMENTS> impl=Type() { impls.add(impl); } ("," impl=Type() { impls.add(impl); })* ]
     "{"
         (var=VarDecl() { vars.addAll(var); } )*
     ["{"
-        (MethodDecl())*
+        (method=MethodDecl() { methods.add(method); } )*
     "}"]
     "}"
     {
-        return new NodeClassDecl(id.image, parent, impls, vars);
+        return new NodeClassDecl(id.image, parent, impls, vars, methods);
     }
 }
 
-void MethodDecl(): {} { (Type() | <VOID>) <IDENT> "(" [FormPars()] ")" (VarDecl())* "{" (Statement())* "}"}
+NodeMethodDecl MethodDecl(): {
+    String returnType = null;
+    Token id;
+    Map<String,String> formPars = new HashMap<String, String>();
+    List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> var = null;
+} { (returnType=Type() | <VOID>) { if(returnType == null) returnType = "void"; } id=<IDENT> "(" [formPars=FormPars()] ")"
+    (var=VarDecl() { vars.addAll(var); })*
+    "{"
+        (Statement())*
+    "}"
+    {
+        return new NodeMethodDecl(id.image, returnType, formPars, vars);
+    }
+}
 
 String Type(): {Token id;} { id=<IDENT> { return id.image; } }
 

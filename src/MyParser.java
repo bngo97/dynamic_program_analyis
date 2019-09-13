@@ -332,9 +332,12 @@ decls.add(new NodeVarDecl(t, id.image));
     jj_consume_token(46);
 }
 
-  static final public void FormPars() throws ParseException {
-    Type();
-    jj_consume_token(IDENT);
+  static final public Map<String,String> FormPars() throws ParseException {Map<String,String> formPars = new HashMap<String,String>();
+    String type;
+    Token id;
+    type = Type();
+    id = jj_consume_token(IDENT);
+formPars.put(id.image, type);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case 47:{
       jj_consume_token(47);
@@ -357,8 +360,8 @@ decls.add(new NodeVarDecl(t, id.image));
         break label_7;
       }
       jj_consume_token(45);
-      Type();
-      jj_consume_token(IDENT);
+      type = Type();
+      id = jj_consume_token(IDENT);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 47:{
         jj_consume_token(47);
@@ -369,7 +372,10 @@ decls.add(new NodeVarDecl(t, id.image));
         jj_la1[17] = jj_gen;
         ;
       }
+formPars.put(id.image, type);
     }
+{if ("" != null) return formPars;}
+    throw new Error("Missing return statement in function");
 }
 
   static final public NodeClassDecl ClassDecl() throws ParseException {Token id;
@@ -378,6 +384,8 @@ decls.add(new NodeVarDecl(t, id.image));
     List<String> impls = new ArrayList<String>();
     List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
     List<NodeVarDecl> var = null;
+    List<NodeMethodDecl> methods = new ArrayList<NodeMethodDecl>();
+    NodeMethodDecl method = null;
     jj_consume_token(CLASS);
     id = jj_consume_token(IDENT);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -446,7 +454,8 @@ vars.addAll(var);
           jj_la1[22] = jj_gen;
           break label_10;
         }
-        MethodDecl();
+        method = MethodDecl();
+methods.add(method);
       }
       jj_consume_token(44);
       break;
@@ -456,14 +465,18 @@ vars.addAll(var);
       ;
     }
     jj_consume_token(44);
-{if ("" != null) return new NodeClassDecl(id.image, parent, impls, vars);}
+{if ("" != null) return new NodeClassDecl(id.image, parent, impls, vars, methods);}
     throw new Error("Missing return statement in function");
 }
 
-  static final public void MethodDecl() throws ParseException {
+  static final public NodeMethodDecl MethodDecl() throws ParseException {String returnType = null;
+    Token id;
+    Map<String,String> formPars = new HashMap<String, String>();
+    List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
+    List<NodeVarDecl> var = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      Type();
+      returnType = Type();
       break;
       }
     case VOID:{
@@ -475,11 +488,12 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
-    jj_consume_token(IDENT);
+if(returnType == null) returnType = "void";
+    id = jj_consume_token(IDENT);
     jj_consume_token(49);
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      FormPars();
+      formPars = FormPars();
       break;
       }
     default:
@@ -498,7 +512,8 @@ vars.addAll(var);
         jj_la1[26] = jj_gen;
         break label_11;
       }
-      VarDecl();
+      var = VarDecl();
+vars.addAll(var);
     }
     jj_consume_token(43);
     label_12:
@@ -523,6 +538,8 @@ vars.addAll(var);
       Statement();
     }
     jj_consume_token(44);
+{if ("" != null) return new NodeMethodDecl(id.image, returnType, formPars, vars);}
+    throw new Error("Missing return statement in function");
 }
 
   static final public String Type() throws ParseException {Token id;
