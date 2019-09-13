@@ -474,6 +474,8 @@ methods.add(method);
     Map<String,String> formPars = new HashMap<String, String>();
     List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
     List<NodeVarDecl> var = null;
+    List<NodeStatement> statements = new ArrayList<NodeStatement>();
+    NodeStatement statement;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
       returnType = Type();
@@ -535,10 +537,11 @@ vars.addAll(var);
         jj_la1[27] = jj_gen;
         break label_12;
       }
-      Statement();
+      statement = Statement();
+statements.add(statement);
     }
     jj_consume_token(44);
-{if ("" != null) return new NodeMethodDecl(id.image, returnType, formPars, vars);}
+{if ("" != null) return new NodeMethodDecl(id.image, returnType, formPars, vars, statements);}
     throw new Error("Missing return statement in function");
 }
 
@@ -548,11 +551,12 @@ vars.addAll(var);
     throw new Error("Missing return statement in function");
 }
 
-  static final public void Statement() throws ParseException {
+  static final public NodeStatement Statement() throws ParseException {NodeStatement statement = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      DesignatorStatement();
+      statement = DesignatorStatement();
       jj_consume_token(46);
+{if ("" != null) return statement;}
       break;
       }
     case IF:{
@@ -693,6 +697,7 @@ vars.addAll(var);
         Statement();
       }
       jj_consume_token(44);
+{if ("" != null) return statement;}
       break;
       }
     default:
@@ -700,10 +705,11 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void DesignatorStatement() throws ParseException {
-    Designator();
+  static final public NodeStatementDesignator DesignatorStatement() throws ParseException {NodeDesignator designator;
+    designator = Designator();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQ:{
       Assignop();
@@ -742,10 +748,16 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return new NodeStatementDesignator(designator);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Designator() throws ParseException {
-    jj_consume_token(IDENT);
+  static final public NodeDesignator Designator() throws ParseException {Token id;
+    List<String> ids = new ArrayList<String>();
+    List<NodeExpr> exprs = new ArrayList<NodeExpr>();
+    NodeExpr expr = null;
+    id = jj_consume_token(IDENT);
+ids.add(id.image);
     label_14:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -761,12 +773,14 @@ vars.addAll(var);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 51:{
         jj_consume_token(51);
-        jj_consume_token(IDENT);
+        id = jj_consume_token(IDENT);
+ids.add(id.image);
         break;
         }
       case 47:{
         jj_consume_token(47);
-        Expr();
+        expr = Expr();
+exprs.add(expr);
         jj_consume_token(48);
         break;
         }
@@ -776,6 +790,8 @@ vars.addAll(var);
         throw new ParseException();
       }
     }
+{if ("" != null) return new NodeDesignator(ids, exprs);}
+    throw new Error("Missing return statement in function");
 }
 
   static final public void Condition() throws ParseException {
@@ -833,7 +849,8 @@ vars.addAll(var);
     }
 }
 
-  static final public void Expr() throws ParseException {
+  static final public NodeExpr Expr() throws ParseException {List<NodeTerm> terms = new ArrayList<NodeTerm>();
+    NodeTerm term = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case MINUS:{
       jj_consume_token(MINUS);
@@ -843,7 +860,8 @@ vars.addAll(var);
       jj_la1[43] = jj_gen;
       ;
     }
-    Term();
+    term = Term();
+terms.add(term);
     label_17:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -857,12 +875,17 @@ vars.addAll(var);
         break label_17;
       }
       Addop();
-      Term();
+      term = Term();
+terms.add(term);
     }
+{if ("" != null) return new NodeExpr(terms);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Term() throws ParseException {
-    Factor();
+  static final public NodeTerm Term() throws ParseException {List<NodeFactor> factors = new ArrayList<NodeFactor>();
+    NodeFactor factor = null;
+    factor = Factor();
+factors.add(factor);
     label_18:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -877,14 +900,22 @@ vars.addAll(var);
         break label_18;
       }
       Mulop();
-      Factor();
+      factor = Factor();
+factors.add(factor);
     }
+{if ("" != null) return new NodeTerm(factors);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Factor() throws ParseException {
+  static final public NodeFactor Factor() throws ParseException {NodeFactor factor = null;
+    NodeDesignator designator = null;
+    NodeActPars actPars = null;
+    Token t = null;
+    String type;
+    NodeExpr expr = null;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
-      Designator();
+      designator = Designator();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 49:{
         jj_consume_token(49);
@@ -895,7 +926,7 @@ vars.addAll(var);
         case BOOL:
         case CHAR:
         case IDENT:{
-          ActPars();
+          actPars = ActPars();
           break;
           }
         default:
@@ -909,27 +940,31 @@ vars.addAll(var);
         jj_la1[47] = jj_gen;
         ;
       }
+factor = new NodeFactorDesignator(designator, actPars);
       break;
       }
     case NUM:{
-      jj_consume_token(NUM);
+      t = jj_consume_token(NUM);
+factor = new NodeFactorPrimitive(t.image);
       break;
       }
     case CHAR:{
-      jj_consume_token(CHAR);
+      t = jj_consume_token(CHAR);
+factor = new NodeFactorPrimitive(t.image);
       break;
       }
     case BOOL:{
-      jj_consume_token(BOOL);
+      t = jj_consume_token(BOOL);
+factor = new NodeFactorPrimitive(t.image);
       break;
       }
     case NEW:{
       jj_consume_token(NEW);
-      Type();
+      type = Type();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 47:{
         jj_consume_token(47);
-        Expr();
+        expr = Expr();
         jj_consume_token(48);
         break;
         }
@@ -937,6 +972,7 @@ vars.addAll(var);
         jj_la1[48] = jj_gen;
         ;
       }
+factor = new NodeFactorNew(type, expr);
       break;
       }
     default:
@@ -944,10 +980,14 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return factor;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void ActPars() throws ParseException {
-    Expr();
+  static final public NodeActPars ActPars() throws ParseException {List<NodeExpr> exprs = new ArrayList<NodeExpr>();
+    NodeExpr expr = null;
+    expr = Expr();
+exprs.add(expr);
     label_19:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -960,38 +1000,43 @@ vars.addAll(var);
         break label_19;
       }
       jj_consume_token(45);
-      Expr();
+      expr = Expr();
+exprs.add(expr);
     }
+{if ("" != null) return new NodeActPars(exprs);}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Assignop() throws ParseException {
-    jj_consume_token(EQ);
+  static final public String Assignop() throws ParseException {Token t;
+    t = jj_consume_token(EQ);
+{if ("" != null) return t.image;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Relop() throws ParseException {
+  static final public String Relop() throws ParseException {Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQEQ:{
-      jj_consume_token(EQEQ);
+      t = jj_consume_token(EQEQ);
       break;
       }
     case NOTEQ:{
-      jj_consume_token(NOTEQ);
+      t = jj_consume_token(NOTEQ);
       break;
       }
     case GR:{
-      jj_consume_token(GR);
+      t = jj_consume_token(GR);
       break;
       }
     case GRE:{
-      jj_consume_token(GRE);
+      t = jj_consume_token(GRE);
       break;
       }
     case LE:{
-      jj_consume_token(LE);
+      t = jj_consume_token(LE);
       break;
       }
     case LEQ:{
-      jj_consume_token(LEQ);
+      t = jj_consume_token(LEQ);
       break;
       }
     default:
@@ -999,16 +1044,18 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return t.image;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Addop() throws ParseException {
+  static final public String Addop() throws ParseException {Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case PLUS:{
-      jj_consume_token(PLUS);
+      t = jj_consume_token(PLUS);
       break;
       }
     case MINUS:{
-      jj_consume_token(MINUS);
+      t = jj_consume_token(MINUS);
       break;
       }
     default:
@@ -1016,20 +1063,22 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return t.image;}
+    throw new Error("Missing return statement in function");
 }
 
-  static final public void Mulop() throws ParseException {
+  static final public String Mulop() throws ParseException {Token t;
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case TIMES:{
-      jj_consume_token(TIMES);
+      t = jj_consume_token(TIMES);
       break;
       }
     case DIV:{
-      jj_consume_token(DIV);
+      t = jj_consume_token(DIV);
       break;
       }
     case MOD:{
-      jj_consume_token(MOD);
+      t = jj_consume_token(MOD);
       break;
       }
     default:
@@ -1037,6 +1086,8 @@ vars.addAll(var);
       jj_consume_token(-1);
       throw new ParseException();
     }
+{if ("" != null) return t.image;}
+    throw new Error("Missing return statement in function");
 }
 
   static private boolean jj_initialized_once = false;

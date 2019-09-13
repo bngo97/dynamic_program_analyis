@@ -201,20 +201,24 @@ NodeMethodDecl MethodDecl(): {
     Map<String,String> formPars = new HashMap<String, String>();
     List<NodeVarDecl> vars = new ArrayList<NodeVarDecl>();
     List<NodeVarDecl> var = null;
+    List<NodeStatement> statements = new ArrayList<NodeStatement>();
+    NodeStatement statement;
 } { (returnType=Type() | <VOID>) { if(returnType == null) returnType = "void"; } id=<IDENT> "(" [formPars=FormPars()] ")"
     (var=VarDecl() { vars.addAll(var); })*
     "{"
-        (Statement())*
+        (statement=Statement() { statements.add(statement); } )*
     "}"
     {
-        return new NodeMethodDecl(id.image, returnType, formPars, vars);
+        return new NodeMethodDecl(id.image, returnType, formPars, vars, statements);
     }
 }
 
 String Type(): {Token id;} { id=<IDENT> { return id.image; } }
 
-void Statement(): {} {
-    (DesignatorStatement() ";") |
+NodeStatement Statement(): {
+    NodeStatement statement = null;
+} {
+    (statement=DesignatorStatement() ";" {return statement;} ) |
     (<IF> "(" Condition() ")" Statement() [<ELSE> Statement()]) |
     (<FOR> "(" [DesignatorStatement()] ";" [Condition()] ";" [DesignatorStatement()] ")" Statement()) |
     (<BREAK> ";") |
@@ -223,11 +227,29 @@ void Statement(): {} {
     (<READ> "(" Designator() ")" ";") |
     (<PRINT> "(" Expr() ["," <NUM>] ")" ";") |
     ("{" (Statement())* "}")
+    {
+        return statement;
+    }
 }
 
-void DesignatorStatement(): {} { Designator() ((Assignop() Expr()) | ("(" [ActPars()] ")") | <PLUSx2> | <MINUSx2>) }
+NodeStatementDesignator DesignatorStatement(): {
+    NodeDesignator designator;
+} { designator=Designator() ((Assignop() Expr()) | ("(" [ActPars()] ")") | <PLUSx2> | <MINUSx2>)
+    {
+        return new NodeStatementDesignator(designator);
+    }
+}
 
-void Designator(): {} { <IDENT> (("." <IDENT>) | ("[" Expr() "]"))*}
+NodeDesignator Designator(): {
+    Token id;
+    List<String> ids = new ArrayList<String>();
+    List<NodeExpr> exprs = new ArrayList<NodeExpr>();
+    NodeExpr expr = null;
+} { id=<IDENT> { ids.add(id.image); } (("." id=<IDENT> { ids.add(id.image); }) | ("[" expr=Expr() { exprs.add(expr); } "]"))*
+    {
+        return new NodeDesignator(ids, exprs);
+    }
+}
 
 void Condition(): {} { CondTerm() (<OR> CondTerm())* }
 
@@ -235,18 +257,56 @@ void CondTerm(): {} { CondFact() (<AND> CondFact())* }
 
 void CondFact(): {} { Expr() [Relop() Expr()] }
 
-void Expr(): {} { [ <MINUS> ] Term() (Addop() Term())* }
+NodeExpr Expr(): {
+    List<NodeTerm> terms = new ArrayList<NodeTerm>();
+    NodeTerm term = null;
+} { [ <MINUS> ] term=Term() { terms.add(term); } (Addop() term=Term() { terms.add(term); })*
+    {
+        return new NodeExpr(terms);
+    }
+}
 
-void Term(): {} { Factor() (Mulop() Factor())* }
+NodeTerm Term(): {
+    List<NodeFactor> factors = new ArrayList<NodeFactor>();
+    NodeFactor factor = null;
+} { factor=Factor() { factors.add(factor); } (Mulop() factor=Factor() { factors.add(factor); })*
+    {
+        return new NodeTerm(factors);
+    }
+}
 
-void Factor(): {} { ( (Designator() ["(" [ActPars()] ")"]) | (<NUM>) | (<CHAR>) | <BOOL> | (<NEW> Type() ["[" Expr() "]"])) }
+NodeFactor Factor(): {
+    NodeFactor factor = null;
+    NodeDesignator designator = null;
+    NodeActPars actPars = null;
+    Token t = null;
+    String type;
+    NodeExpr expr = null;
+} { (
+    (designator=Designator() ["(" [actPars=ActPars()] ")"] { factor = new NodeFactorDesignator(designator, actPars); }) |
+    (t=<NUM> { factor = new NodeFactorPrimitive(t.image); } ) |
+    (t=<CHAR> { factor = new NodeFactorPrimitive(t.image); } ) |
+    (t=<BOOL> { factor = new NodeFactorPrimitive(t.image); } ) |
+    (<NEW> type=Type() ["[" expr=Expr() "]"] { factor = new NodeFactorNew(type, expr); })
+    )
+    {
+        return factor;
+    }
+}
 
-void ActPars(): {} { Expr() ("," Expr())* }
+NodeActPars ActPars(): {
+    List<NodeExpr> exprs = new ArrayList<NodeExpr>();
+    NodeExpr expr = null;
+} { expr=Expr() { exprs.add(expr); } ("," expr=Expr() { exprs.add(expr); })*
+    {
+        return new NodeActPars(exprs);
+    }
+}
 
-void Assignop(): {} { <EQ> }
+String Assignop(): { Token t; } { t=<EQ> { return t.image; } }
 
-void Relop(): {} { ( <EQEQ> | <NOTEQ> | <GR> | <GRE> | <LE> | <LEQ>) }
+String Relop(): { Token t; } { ( t=<EQEQ> | t=<NOTEQ> | t=<GR> | t=<GRE> | t=<LE> | t=<LEQ> ) { return t.image; } }
 
-void Addop(): {} { ( <PLUS> | <MINUS> ) }
+String Addop(): { Token t; } { ( t=<PLUS> | t=<MINUS> ) { return t.image; } }
 
-void Mulop(): {} { ( <TIMES> | <DIV> | <MOD> ) }
+String Mulop(): { Token t; } { ( t=<TIMES> | t=<DIV> | t=<MOD> ) { return t.image; } }
