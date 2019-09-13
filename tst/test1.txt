@@ -1,9 +1,10 @@
 program p  
 	class a extends b implements c, de  { 
+		// hello
 		int p, q[]; 
 		{  
 			void add(int a, int b) 
-			int x, h; char p, q; 
+			int x, h; char p, q; // this is Brendan
 			{ 
 				a.b[-1 + true + 10*hello.add(1, true, x+1/9+2)]++; 
 			} 

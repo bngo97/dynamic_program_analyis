@@ -20,7 +20,8 @@ public class MyParser
             throw new RuntimeException("Incorrect input flag");
         }
         try {
-            parser.Prog();
+            NodeProg p = parser.Prog();
+            System.out.println(p.name);
             System.out.println("Success!");
         } catch(Exception e) {
             System.out.println("Syntax check failed:");
@@ -34,6 +35,7 @@ SKIP: { " " }
 SKIP: { "\n" }
 SKIP: { "\r" }
 SKIP: { "\t" }
+SKIP: {<"//" (~["\n","\r"])* ("\n"|"\r")>}
 
 TOKEN: { <PROG: "program"> }
 TOKEN: { <CONST: "const"> }
@@ -81,9 +83,29 @@ TOKEN: { <BOOL: ( "true" | "false" )>}
 TOKEN: { <CHAR: "'"[" " - "~"]"'">}
 TOKEN: { <IDENT: (["a"-"z"] | ["A"-"Z"]) (["a"-"z"] | ["A"-"Z"] | ["0"-"9"] | "_")*>}
 
-void Prog(): {} { <PROG> <IDENT> (ConstDecl() | EnumDecl() | VarDecl() | ClassDecl() | InterfaceDecl())* "{" (MethodDecl())* "}" <EOF> }
+NodeProg Prog(): {
+    Token n;
+    NodeProg p;
+} {
+    <PROG> n=<IDENT>
+    (
+        ConstDecl() |
+        EnumDecl() |
+        VarDecl() |
+        ClassDecl() |
+        InterfaceDecl()
+     )*
+    "{"
+    (
+        MethodDecl()
+    )*
+    "}" <EOF>
+    {
+        return new NodeProg(n.image);
+    }
+}
 
-void ConstDecl(): {} { <CONST> Type() <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ) ("," <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ))* ";" }
+NodeConstDecl ConstDecl(): {} { <CONST> Type() <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ) ("," <IDENT> <EQ> ( <NUM> | <BOOL> | <CHAR> ))* ";" }
 
 void EnumDecl(): {} { <ENUM> <IDENT> "{" <IDENT> [<EQ><NUM>] ("," <IDENT> [<EQ><NUM>])*"}" }
 
