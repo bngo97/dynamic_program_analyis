@@ -220,6 +220,9 @@ NodeStatement Statement(): {
     NodeStatement statement3 = null;
     NodeCondition condition = null;
     NodeExpr expression = null;
+    NodeDesignator designator = null;
+    Token t = null;
+    List<NodeStatement> statements = new ArrayList<NodeStatement>();
 } {
     (statement1=DesignatorStatement() ";" { return statement1; } ) |
     (<IF> "(" condition=Condition() ")" statement1=Statement() [<ELSE> statement2=Statement()]
@@ -233,9 +236,9 @@ NodeStatement Statement(): {
     (<BREAK> ";" { return new NodeStatementNoOp(); }) |
     (<CONTINUE> ";" { return new NodeStatementNoOp(); }) |
     (<RETURN> [expression=Expr()] ";" { return new NodeStatementReturn(expression); }) |
-    (<READ> "(" Designator() ")" ";") |
-    (<PRINT> "(" Expr() ["," <NUM>] ")" ";") |
-    ("{" (Statement())* "}")
+    (<READ> "(" designator=Designator() ")" ";" { return new NodeStatementRead(designator); }) |
+    (<PRINT> "(" expression=Expr() ["," t=<NUM>] ")" ";" { return new NodeStatementPrint(expression, (t == null ? null : t.image)); }) |
+    ("{" (statement1=Statement() { statements.add(statement1); })* "}" { return new NodeStatementNested(statements); })
     {
         return statement1;
     }

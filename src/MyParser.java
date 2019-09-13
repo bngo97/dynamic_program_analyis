@@ -556,6 +556,9 @@ statements.add(statement);
     NodeStatement statement3 = null;
     NodeCondition condition = null;
     NodeExpr expression = null;
+    NodeDesignator designator = null;
+    Token t = null;
+    List<NodeStatement> statements = new ArrayList<NodeStatement>();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case IDENT:{
       statement1 = DesignatorStatement();
@@ -659,19 +662,20 @@ statements.add(statement);
     case READ:{
       jj_consume_token(READ);
       jj_consume_token(49);
-      Designator();
+      designator = Designator();
       jj_consume_token(50);
       jj_consume_token(46);
+{if ("" != null) return new NodeStatementRead(designator);}
       break;
       }
     case PRINT:{
       jj_consume_token(PRINT);
       jj_consume_token(49);
-      Expr();
+      expression = Expr();
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 45:{
         jj_consume_token(45);
-        jj_consume_token(NUM);
+        t = jj_consume_token(NUM);
         break;
         }
       default:
@@ -680,6 +684,7 @@ statements.add(statement);
       }
       jj_consume_token(50);
       jj_consume_token(46);
+{if ("" != null) return new NodeStatementPrint(expression, (t == null ? null : t.image));}
       break;
       }
     case 43:{
@@ -703,9 +708,11 @@ statements.add(statement);
           jj_la1[34] = jj_gen;
           break label_13;
         }
-        Statement();
+        statement1 = Statement();
+statements.add(statement1);
       }
       jj_consume_token(44);
+{if ("" != null) return new NodeStatementNested(statements);}
 {if ("" != null) return statement1;}
       break;
       }
