@@ -17,7 +17,7 @@ program P
 		char c, d;
 		{
 			void add(int a, int b) int c, d; {
-				a.b.c[new x[z+1]] = x+1;
+				a.b.c[new x[z+1]] = q+111;
 			}
 		}
 	}

@@ -218,7 +218,7 @@ String Type(): {Token id;} { id=<IDENT> { return id.image; } }
 NodeStatement Statement(): {
     NodeStatement statement = null;
 } {
-    (statement=DesignatorStatement() ";" {return statement;} ) |
+    (statement=DesignatorStatement() ";" { return statement; } ) |
     (<IF> "(" Condition() ")" Statement() [<ELSE> Statement()]) |
     (<FOR> "(" [DesignatorStatement()] ";" [Condition()] ";" [DesignatorStatement()] ")" Statement()) |
     (<BREAK> ";") |
@@ -234,9 +234,11 @@ NodeStatement Statement(): {
 
 NodeStatementDesignator DesignatorStatement(): {
     NodeDesignator designator;
-} { designator=Designator() ((Assignop() Expr()) | ("(" [ActPars()] ")") | <PLUSx2> | <MINUSx2>)
+    NodeExpr expr = null;
+    NodeActPars actPars = null;
+} { designator=Designator() ((Assignop() expr=Expr()) | ("(" [actPars=ActPars()] ")") | <PLUSx2> | <MINUSx2>)
     {
-        return new NodeStatementDesignator(designator);
+        return new NodeStatementDesignator(designator, expr, actPars);
     }
 }
 

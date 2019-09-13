@@ -709,11 +709,13 @@ statements.add(statement);
 }
 
   static final public NodeStatementDesignator DesignatorStatement() throws ParseException {NodeDesignator designator;
+    NodeExpr expr = null;
+    NodeActPars actPars = null;
     designator = Designator();
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case EQ:{
       Assignop();
-      Expr();
+      expr = Expr();
       break;
       }
     case 49:{
@@ -725,7 +727,7 @@ statements.add(statement);
       case BOOL:
       case CHAR:
       case IDENT:{
-        ActPars();
+        actPars = ActPars();
         break;
         }
       default:
@@ -748,7 +750,7 @@ statements.add(statement);
       jj_consume_token(-1);
       throw new ParseException();
     }
-{if ("" != null) return new NodeStatementDesignator(designator);}
+{if ("" != null) return new NodeStatementDesignator(designator, expr, actPars);}
     throw new Error("Missing return statement in function");
 }
 
