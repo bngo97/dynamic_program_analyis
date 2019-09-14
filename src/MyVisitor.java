@@ -10,7 +10,6 @@ public class MyVisitor extends Visitor {
     Map<String, Map<String, String>> enumProperties;
 
     // Map from class to vars/methods declared in the class
-    // Classes can only extend classes defined before
     Map<String, Set<String>> classProperties;
 
     // Map from interface to method declarations
@@ -46,6 +45,9 @@ public class MyVisitor extends Visitor {
         if(!isMainMethod) {
             throw new RuntimeException("No main method declared in program!");
         }
+        for(NodeClassDecl classDecl : node.classDecls) {
+            classProperties.put(classDecl.id, null);
+        }
         // Set globally defined variables
         for(NodeConstDecl constDecl : node.constDecls) {
             if(globalVars.containsKey(constDecl.id)) {
@@ -56,6 +58,9 @@ public class MyVisitor extends Visitor {
         for(NodeVarDecl var : node.varDecls) {
             if(globalVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in global scope already!");
+            }
+            if(!isPrimitive(var.type) && !classProperties.containsKey(var.type)) {
+                throw new RuntimeException("Type " + var.type + " is undefined");
             }
             globalVars.put(var.id, var.type);
         }
@@ -86,6 +91,9 @@ public class MyVisitor extends Visitor {
         for(NodeVarDecl var : node.vars) {
             if(classVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in class scope already!");
+            }
+            if(!isPrimitive(var.type) && !classProperties.containsKey(var.type)) {
+                throw new RuntimeException("Type " + var.type + " is undefined");
             }
             classVars.put(var.id, var.type);
             properties.add(var.id);
@@ -293,6 +301,9 @@ public class MyVisitor extends Visitor {
             if(localVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in local scope already!");
             }
+            if(!isPrimitive(var.type) && !classProperties.containsKey(var.type)) {
+                throw new RuntimeException("Type " + var.type + " is undefined");
+            }
             localVars.put(var.id, var.type);
         }
     }
@@ -470,4 +481,9 @@ public class MyVisitor extends Visitor {
     public void visitEnd(NodeInterfaceMethodDecl node) {
 
     }
+
+    private boolean isPrimitive(String type) {
+        return type.equals("int") | type.equals("bool") | type.equals("char") | type.equals("void");
+    }
+
 }

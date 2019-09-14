@@ -27,10 +27,37 @@ public class MyParser implements MyParserConstants {
             NodeProg ast = parser.Prog();
             Visitor v = new MyVisitor();
             ast.accept(v);
-            System.out.println("Success!");
+            if(args.length == 3) {
+                if(args[2].equals("0")) {
+                    System.out.println(args[1] + " passed as expected!");
+                } else {
+                    System.out.println(args[1] + " TEST FAILED UNEXPECTEDLY");
+                }
+            } else {
+                System.out.println("Pass!");
+            }
         } catch(ParseException e) {
-            System.out.println("Failure Parsing!");
-            System.out.println(e.getMessage());
+            if(args.length == 3) {
+                if(args[2].equals("1")) {
+                    System.out.println(args[1] + " failed as expected!");
+                } else {
+                    System.out.println(args[1] + " TEST PASSED UNEXPECTEDLY");
+                }
+            } else {
+                System.out.println("Failure Parsing!");
+                System.out.println(e.getMessage());
+            }
+        } catch(RuntimeException e) {
+            if(args.length == 3) {
+                if(args[2].equals("1")) {
+                    System.out.println(args[1] + " failed as expected!");
+                } else {
+                    System.out.println(args[1] + " TEST PASSED UNEXPECTEDLY");
+                }
+            } else {
+                System.out.println("Failure Running AST!");
+                System.out.println(e.getMessage());
+            }
         }
     }
 

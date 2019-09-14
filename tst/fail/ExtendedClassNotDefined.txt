@@ -1,0 +1,17 @@
+program P
+
+interface I {
+	void add(int a, int b);
+}
+
+class B extends A implements I {
+	{
+	void add(int a, int b) {
+		a = a + b;
+	}
+	}
+}
+
+{
+	void main() {}
+}
