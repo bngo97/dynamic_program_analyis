@@ -14,6 +14,6 @@ The main function in MyParser takes multiple inputs, including the input mode, t
 ./test.sh -f filepath <br/>
 ./test.sh -t "program P {void main(){}}" <br/>
 
-EE 379K Dynamic Program Analysis 
-
+<br/>
+EE 379K Dynamic Program Analysis <br/>
 Brendan Ngo
