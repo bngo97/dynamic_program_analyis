@@ -11,12 +11,16 @@ public class NodeInterfaceDecl extends NodeDecl {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        for(NodeInterfaceMethodDecl method : methods) {
+            method.accept(v);
+        }
+        v.visitEnd(this);
     }
 
     @Override
     public String toString() {
-        return "";
+        return "Interface " + id;
     }
 
 }

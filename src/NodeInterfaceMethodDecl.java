@@ -13,7 +13,8 @@ public class NodeInterfaceMethodDecl extends NodeDecl {
 
     @Override
     public void accept(Visitor v) {
-
+        v.visit(this);
+        v.visitEnd(this);
     }
 
     @Override

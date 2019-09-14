@@ -31,9 +31,6 @@ public class MyParser implements MyParserConstants {
         } catch(ParseException e) {
             System.out.println("Failure Parsing!");
             System.out.println(e.getMessage());
-        } catch(RuntimeException e) {
-            System.out.println("Failure Running!");
-            System.out.println(e.getMessage());
         }
     }
 
@@ -780,11 +777,10 @@ statements.add(statement1);
 }
 
   static final public NodeDesignator Designator() throws ParseException {Token id;
-    List<String> ids = new ArrayList<String>();
-    List<NodeExpr> exprs = new ArrayList<NodeExpr>();
-    NodeExpr expr = null;
+    Token nestedID;
+    List<Object> nestedVals = new ArrayList<Object>();
+    Object o = null;
     id = jj_consume_token(IDENT);
-ids.add(id.image);
     label_14:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -800,15 +796,15 @@ ids.add(id.image);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case 51:{
         jj_consume_token(51);
-        id = jj_consume_token(IDENT);
-ids.add(id.image);
+        nestedID = jj_consume_token(IDENT);
+o=nestedID.image; nestedVals.add(o);
         break;
         }
       case 47:{
         jj_consume_token(47);
-        expr = Expr();
-exprs.add(expr);
+        o = Expr();
         jj_consume_token(48);
+nestedVals.add(o);
         break;
         }
       default:
@@ -817,7 +813,7 @@ exprs.add(expr);
         throw new ParseException();
       }
     }
-{if ("" != null) return new NodeDesignator(ids, exprs);}
+{if ("" != null) return new NodeDesignator(id.image, nestedVals);}
     throw new Error("Missing return statement in function");
 }
 

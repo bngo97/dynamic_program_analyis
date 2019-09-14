@@ -1,24 +1,33 @@
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class MyVisitor extends Visitor {
 
-    // We use sets because we do not care about value
-    // We only care about declaration of variables
-    // There are 3 types of scopes: global, class, and local/method
-    // We use 3 sets to make sure there is no overlap in scope names
-    Set<String> globalVars;
-    Set<String> classVars;
-    Set<String> localVars;
+    // Maps from id to type for variables in different scopes
+    Map<String, String> globalVars;
+    Map<String, String> classVars;
+    Map<String, String> localVars;
 
-    Map<String, Set<String>> declaredClasses;
+    Map<String, Map<String, String>> enumProperties;
 
+    // Map from class to vars/methods declared in the class
+    // Classes can only extend classes defined before
+    Map<String, Set<String>> classProperties;
+
+    // Map from interface to method declarations
+    // method stored as string concatenation of returnType + name + input types
+    Map<String, Set<String>> interfaceProperties;
+
+    // program methods names
+    Set<String> programMethods;
 
     public MyVisitor() {
-        globalVars = new HashSet<>();
-        classVars = new HashSet<>();
-        localVars = new HashSet<>();
+        globalVars = new HashMap<>();
+        classVars = new HashMap<>();
+        localVars = new HashMap<>();
+        interfaceProperties = new HashMap<>();
+        classProperties = new HashMap<>();
+        programMethods = new HashSet<>();
+        enumProperties = new HashMap<>();
     }
 
     @Override
@@ -32,28 +41,26 @@ public class MyVisitor extends Visitor {
                 }
                 isMainMethod = true;
             }
+            programMethods.add(method.id);
         }
         if(!isMainMethod) {
             throw new RuntimeException("No main method declared in program!");
         }
         // Set globally defined variables
         for(NodeConstDecl constDecl : node.constDecls) {
-            if(!globalVars.add(constDecl.id)) {
+            if(globalVars.containsKey(constDecl.id)) {
                 throw new RuntimeException("Variable name \"" + constDecl.id + "\" exists in global scope already!");
             }
+            globalVars.put(constDecl.id, constDecl.type);
         }
         for(NodeVarDecl var : node.varDecls) {
-            if(!globalVars.add(var.id)) {
+            if(globalVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in global scope already!");
             }
+            globalVars.put(var.id, var.type);
         }
-        // Assuming enum ids are global variables also
         for(NodeEnumDecl enumDecl : node.enumDecls) {
-            for(String id : enumDecl.vals.keySet()) {
-                if(!globalVars.add(id)) {
-                    throw new RuntimeException("Variable name \"" + id + "\" exists in global scope already!");
-                }
-            }
+            enumProperties.put(enumDecl.id, enumDecl.vals);
         }
     }
 
@@ -74,18 +81,44 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeClassDecl node) {
+        Set<String> properties = new HashSet<>();
+
         for(NodeVarDecl var : node.vars) {
-            if(!classVars.add(var.id)) {
+            if(classVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in class scope already!");
             }
+            classVars.put(var.id, var.type);
+            properties.add(var.id);
         }
-        classVars.add("this");
+        Set<String> methods = new HashSet<>();
+        for(NodeMethodDecl method : node.methods) {
+            List<String> inputTypes = new ArrayList<String>(method.formPars.values());
+            Collections.sort(inputTypes);
+            String s = method.returnType + method.id + inputTypes.toString();
+            methods.add(s);
+            properties.add(method.id);
+        }
+
+        if(node.parent != null && !classProperties.containsKey(node.parent)) {
+            throw new RuntimeException("Class " + node.id + " extends undeclared class!");
+        }
+        for(String interf : node.impls) {
+            if(!interfaceProperties.containsKey(interf)) {
+                throw new RuntimeException("Class " + node.id + " implements undeclared class!");
+            }
+            for(String method : interfaceProperties.get(interf)) {
+                if(!methods.contains(method)) {
+                    throw new RuntimeException("Class " + node.id + " does not implement " + interf + " properly");
+                }
+            }
+        }
+
+        classProperties.put(node.id, properties);
     }
 
     @Override
     public void visitEnd(NodeClassDecl node) {
-        System.out.println("WTF");
-        classVars = new HashSet<>();
+        classVars = new HashMap<>();
     }
 
     @Override
@@ -130,11 +163,43 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeDesignator node) {
-        System.out.println(node.ids);
-        System.out.println("class vars = " + classVars);
-        for(String id : node.ids) {
-            if(!globalVars.contains(id) && !classVars.contains(id) && !localVars.contains(id)) {
+        String id = node.id;
+        if(node.nested.size() == 0) {
+            if(!programMethods.contains(id) &&
+                    !globalVars.containsKey(node.id) &&
+                    !classVars.containsKey(node.id) &&
+                    !localVars.containsKey(node.id)) {
                 throw new RuntimeException("Variable \"" + id + "\" used but not declared");
+            }
+        } else {
+            Object nestedId = node.nested.get(0);
+            if(!(nestedId instanceof String)) {
+                return;
+            }
+            String nextId = (String) nestedId;
+            if(id.equals("this")) {
+                if(!classVars.containsKey(nextId)) {
+                    throw new RuntimeException("Variable \"" + nextId + "\" used but not declared");
+                }
+            } else if(enumProperties.containsKey(id)) {
+                if(!enumProperties.get(id).containsKey(nextId)) {
+                    throw new RuntimeException("key " + nextId + " not defined in enum " + id);
+                }
+            } else if(localVars.containsKey(id)) {
+                String type = localVars.get(id);
+                if(!classProperties.get(type).contains(nextId)) {
+                    throw new RuntimeException("Class " + type + " does not contain property " + nextId);
+                }
+            } else if(classVars.containsKey(id)) {
+                String type = classVars.get(id);
+                if(!classProperties.get(type).contains(nextId)) {
+                    throw new RuntimeException("Class " + type + " does not contain property " + nextId);
+                }
+            } else if(globalVars.containsKey(id)) {
+                String type = globalVars.get(id);
+                if(!classProperties.get(type).contains(nextId)) {
+                    throw new RuntimeException("Class " + type + " does not contain property " + nextId);
+                }
             }
         }
     }
@@ -218,21 +283,23 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeMethodDecl node) {
-        for(String id : node.formPars.keySet()) {
-            if(!localVars.add(id)) {
-                throw new RuntimeException("Variable name \"" + id + "\" exists in local scope already!");
+        for(Map.Entry<String,String> entry : node.formPars.entrySet()) {
+            if(localVars.containsKey(entry.getKey())) {
+                throw new RuntimeException("Variable name \"" + entry.getKey() + "\" exists in local scope already!");
             }
+            localVars.put(entry.getKey(), entry.getValue());
         }
         for(NodeVarDecl var : node.vars) {
-            if (!localVars.add(var.id)) {
+            if(localVars.containsKey(var.id)) {
                 throw new RuntimeException("Variable name \"" + var.id + "\" exists in local scope already!");
             }
+            localVars.put(var.id, var.type);
         }
     }
 
     @Override
     public void visitEnd(NodeMethodDecl node) {
-        localVars = new HashSet<>();
+        localVars = new HashMap<>();
     }
 
     @Override
@@ -379,7 +446,14 @@ public class MyVisitor extends Visitor {
 
     @Override
     public void visit(NodeInterfaceDecl node) {
-
+        Set<String> methods = new HashSet<String>();
+        for(NodeInterfaceMethodDecl method : node.methods) {
+            List<String> inputTypes = new ArrayList<String>(method.formPars.values());
+            Collections.sort(inputTypes);
+            String s = method.returnType + method.id + inputTypes.toString();
+            methods.add(s);
+        }
+        interfaceProperties.put(node.id, methods);
     }
 
     @Override

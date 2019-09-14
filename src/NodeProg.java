@@ -39,6 +39,9 @@ public class NodeProg extends NodeDecl {
         for(NodeVarDecl var : varDecls) {
             var.accept(v);
         }
+        for(NodeInterfaceDecl interf : interfaces) {
+            interf.accept(v);
+        }
         for(NodeClassDecl classDecl : classDecls) {
             classDecl.accept(v);
         }

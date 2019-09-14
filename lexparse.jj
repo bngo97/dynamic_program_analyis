@@ -31,9 +31,6 @@ public class MyParser
         } catch(ParseException e) {
             System.out.println("Failure Parsing!");
             System.out.println(e.getMessage());
-        } catch(RuntimeException e) {
-            System.out.println("Failure Running!");
-            System.out.println(e.getMessage());
         }
     }
 }
@@ -269,12 +266,12 @@ NodeStatementDesignator DesignatorStatement(): {
 
 NodeDesignator Designator(): {
     Token id;
-    List<String> ids = new ArrayList<String>();
-    List<NodeExpr> exprs = new ArrayList<NodeExpr>();
-    NodeExpr expr = null;
-} { id=<IDENT> { ids.add(id.image); } (("." id=<IDENT> { ids.add(id.image); }) | ("[" expr=Expr() { exprs.add(expr); } "]"))*
+    Token nestedID;
+    List<Object> nestedVals = new ArrayList<Object>();
+    Object o = null;
+} { id=<IDENT> (("." nestedID=<IDENT> { o=nestedID.image; nestedVals.add(o); }) | ("[" o=Expr() "]" {nestedVals.add(o);}))*
     {
-        return new NodeDesignator(ids, exprs);
+        return new NodeDesignator(id.image, nestedVals);
     }
 }
 
