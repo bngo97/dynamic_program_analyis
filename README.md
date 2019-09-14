@@ -9,10 +9,11 @@ There are 2 testing scripts included in the repo. The run_all_tests.sh will run 
 The main function in MyParser takes multiple inputs, including the input mode, the actual input, and the expected behaviour of the test (pass/fail). The first 2 flags are mandatory, while the third is optional. The first flag is either "-t" for text input from the console from or "-f" to specify a file path. The second argument is either the text input typed in between "" or the file path to a file. The third argument is either 0 if the test should fail, or it is 1 if the test should pass. If the third option is designated, you will not see why the test failed/passed, but only see if the behaviour is as expected. Running it without the third flag will give you error messages. To run a single test, you can use the test.sh script, which takes the first two arguments.
 
 
-./compile.sh
-./run_all_tests.sh
-./test.sh -f filepath
-./test.sh -t "program P {void main(){}}"
+./compile.sh <br/>
+./run_all_tests.sh <br/>
+./test.sh -f filepath <br/>
+./test.sh -t "program P {void main(){}}" <br/>
 
 EE 379K Dynamic Program Analysis 
+
 Brendan Ngo
