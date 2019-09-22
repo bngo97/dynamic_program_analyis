@@ -1,3 +1,5 @@
+import gov.nasa.jpf.Config;
+import gov.nasa.jpf.JPF;
 import gov.nasa.jpf.ListenerAdapter;
 import gov.nasa.jpf.vm.*;
 
@@ -15,6 +17,12 @@ public class CodeCoverageListener extends ListenerAdapter {
         classLineCoverage = new HashMap<>();
         packages = new HashSet<>();
     }
+
+    public CodeCoverageListener(Config config, JPF jpf) {
+        //jpf.addPublisherExtension();
+    }
+
+    // java.*, gov.*, sun.*, java.*
 
     @Override
     public void executeInstruction(VM vm, ThreadInfo currentThread, Instruction instructionToExecute) {
@@ -34,12 +42,18 @@ public class CodeCoverageListener extends ListenerAdapter {
         }
     }
 
+    public void classLoaded(VM vm, ClassInfo ci) {
+        
+    }
+
     @Override
     public void gcEnd(VM vm) {
         System.out.println(classLineCoverage);
 //        System.out.println(packages);
         // OUTPUT TO FILE
     }
+
+
 
 }
 

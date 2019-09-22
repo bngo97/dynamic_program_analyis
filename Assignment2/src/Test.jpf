@@ -1,0 +1,3 @@
+target = SimpleTest
+listener = MemoizationListener
+site = /Users/bngo/.jpf/site.properties
