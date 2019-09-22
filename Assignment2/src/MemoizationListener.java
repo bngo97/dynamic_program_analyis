@@ -171,10 +171,69 @@ public class MemoizationListener extends ListenerAdapter {
     public void methodExited (VM vm, ThreadInfo currentThread, MethodInfo exitedMethod) {
         if(isMemoizedFunction(exitedMethod)) {
             System.out.println("EXIT KEY = " + argumentKey);
-//            System.out.println(exitedMethod.getName());
-//            int result = currentThread.getTopFrame().getResult();
-//            currentThread.getTopFrame().setResult(result, null);
-            //System.out.println("RESULT = " + result);
+            String classMethodKey = exitedMethod.getClassName() + "," + exitedMethod.getName();
+            switch(exitedMethod.getReturnType()) {
+                // int
+                case("I"):
+                    Map<String, Integer> intMethodValues = intValues.getOrDefault(classMethodKey, new HashMap<>());
+                    int intResult = currentThread.getTopFrame().getResult();
+                    currentThread.getTopFrame().setResult(intResult, null);
+                    if(!intMethodValues.containsKey(argumentKey)) {
+                        intMethodValues.put(argumentKey, intResult);
+                        intValues.put(classMethodKey, intMethodValues);
+                    }
+                    break;
+                // double
+                case("D"):
+                    Map<String, Double> doubleMethodValues = doubleValues.getOrDefault(classMethodKey, new HashMap<>());
+                    double doubleResult = currentThread.getTopFrame().getDoubleResult();
+                    currentThread.getTopFrame().setResult(Double.doubleToLongBits(doubleResult), null);
+                    if(!doubleMethodValues.containsKey(argumentKey)) {
+                        doubleMethodValues.put(argumentKey, doubleResult);
+                        doubleValues.put(classMethodKey, doubleMethodValues);
+                    }
+                    break;
+                // boolean
+                case("Z"):
+                    Map<String, Boolean> boolMethodValues = boolValues.getOrDefault(classMethodKey, new HashMap<>());
+                    boolean boolResult = currentThread.getTopFrame().getResult() == 1;
+                    currentThread.getTopFrame().setResult(boolResult ? 1 : 0, null);
+                    if(!boolMethodValues.containsKey(argumentKey)) {
+                        boolMethodValues.put(argumentKey, boolResult);
+                        boolValues.put(classMethodKey, boolMethodValues);
+                    }
+                    break;
+                // long
+                case("J"):
+                    Map<String, Long> longMethodValues = longValues.getOrDefault(classMethodKey, new HashMap<>());
+                    long longResult = currentThread.getTopFrame().getLongResult();
+                    currentThread.getTopFrame().setResult(longResult, null);
+                    if(!longMethodValues.containsKey(argumentKey)) {
+                        longMethodValues.put(argumentKey, longResult);
+                        longValues.put(classMethodKey, longMethodValues);
+                    }
+                    break;
+                // float
+                case("F"):
+                    Map<String, Float> floatMethodValues = floatValues.getOrDefault(classMethodKey, new HashMap<>());
+                    float floatResult = currentThread.getTopFrame().getFloatResult();
+                    currentThread.getTopFrame().setResult(Float.floatToIntBits(floatResult), null);
+                    if(!floatMethodValues.containsKey(argumentKey)) {
+                        floatMethodValues.put(argumentKey, floatResult);
+                        floatValues.put(classMethodKey, floatMethodValues);
+                    }
+                    break;
+                // char
+                case("C"):
+                    Map<String, Character> charMethodValues = charValues.getOrDefault(classMethodKey, new HashMap<>());
+                    char charResult = (char) currentThread.getTopFrame().getResult();
+                    currentThread.getTopFrame().setResult(charResult, null);
+                    if(!charMethodValues.containsKey(argumentKey)) {
+                        charMethodValues.put(argumentKey, charResult);
+                        charValues.put(classMethodKey, charMethodValues);
+                    }
+                    break;
+            }
         }
     }
 
