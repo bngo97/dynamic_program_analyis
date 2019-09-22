@@ -1,79 +1,190 @@
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import gov.nasa.jpf.ListenerAdapter;
-import gov.nasa.jpf.jvm.bytecode.IRETURN;
-import gov.nasa.jpf.jvm.bytecode.JVMInvokeInstruction;
-import gov.nasa.jpf.jvm.bytecode.RETURN;
 import gov.nasa.jpf.vm.*;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class MemoizationListener extends ListenerAdapter {
+    // Map from className/methodName concatenation, to input values to return value
+    // Map<ClassName+MethodName, Map<Inputs, Value>>>
+    Map<String, Map<String, Integer>> intValues;
+    Map<String, Map<String, Double>> doubleValues;
+    Map<String, Map<String, Long>> longValues;
+    Map<String, Map<String, Float>> floatValues;
+    Map<String, Map<String, Boolean>> boolValues;
+    Map<String, Map<String, Character>> charValues;
 
-    Map<String, Map<String, Integer>> values;
+    Set<String> primitiveReturnTypes;
+
+    String argumentKey;
 
     public MemoizationListener() {
-        values = new HashMap<>();
-    }
+        primitiveReturnTypes = new HashSet<>();
 
-    // CLASS LOADED
+        // Integer
+        intValues = new HashMap<>();
+        primitiveReturnTypes.add("I");
+
+        // Double
+        doubleValues = new HashMap<>();
+        primitiveReturnTypes.add("D");
+
+        // Long
+        longValues = new HashMap<>();
+        primitiveReturnTypes.add("J");
+
+        floatValues = new HashMap<>();
+        primitiveReturnTypes.add("F");
+
+        // Boolean
+        boolValues = new HashMap<>();
+        primitiveReturnTypes.add("Z");
+
+        charValues = new HashMap<>();
+        primitiveReturnTypes.add("C");
+
+    }
 
     @Override
     public void methodEntered (VM vm, ThreadInfo currentThread, MethodInfo enteredMethod) {
-        System.out.println(enteredMethod.getClassInfo().getPackageName());
-        String packageName = enteredMethod.getClassInfo().getPackageName();
-        if(packageName.equals("")) {
-            String inputs = "";
-            StackFrame frame = currentThread.getTopFrame();
-            Object[] args = frame.getArgumentValues(currentThread);
-//            System.out.println(enteredMethod.getName() + ": " + Arrays.toString(args));
-            String hash = "";
-            for(Object o : args) {
-                if(o instanceof DynamicElementInfo) {
-                    DynamicElementInfo element = (DynamicElementInfo) o;
-                    System.out.println(o);
-                    dfs(element, currentThread, hash);
-                } else {
-                   //System.out.println(o);
-                    // APPEND HASH
-                }
-            }
-            // hash == key
-            if(values.containsKey(hash)) {
+        if(!isMemoizedFunction(enteredMethod)) {
+            return;
+        }
 
-            }
-            System.out.println(enteredMethod.getName());
-            if(enteredMethod.getName().equals("test")) {
-                currentThread.getTopFrame().setResult(69, null);
-                currentThread.setPC(enteredMethod.getLastInsn());
+        argumentKey = "";
+        ElementInfo e = currentThread.getHeap().get(currentThread.getThis());
+        argumentKey = dfs(e, currentThread, argumentKey);
+        Object[] args = currentThread.getTopFrame().getArgumentValues(currentThread);
+        for(Object o : args) {
+            if(o instanceof DynamicElementInfo) {
+                DynamicElementInfo element = (DynamicElementInfo) o;
+                dfs(element, currentThread, argumentKey);
+            } else {
+                argumentKey += o + ",";
             }
         }
+        String className = enteredMethod.getClassName();
+        String methodName = enteredMethod.getName();
+        String classMethodKey = className + "," + methodName;
+
+        String returnType = enteredMethod.getReturnType();
+        System.out.println("KEY = "+ argumentKey);
+
+        switch (enteredMethod.getReturnType()) {
+            // int
+            case("I"):
+                if(intValues.containsKey(classMethodKey)) {
+                    Map<String, Integer> methodValues = intValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(methodValues.get(argumentKey), null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+            // double
+            case("D"):
+                if(doubleValues.containsKey(classMethodKey)) {
+                    Map<String, Double> methodValues = doubleValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(Double.doubleToLongBits(methodValues.get(argumentKey)), null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+            // boolean
+            case("Z"):
+                if(boolValues.containsKey(classMethodKey)) {
+                    Map<String, Boolean> methodValues = boolValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(methodValues.get(argumentKey).booleanValue() ? 1 : 0, null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+            // long
+            case("J"):
+                if(longValues.containsKey(classMethodKey)) {
+                    Map<String, Long> methodValues = longValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(methodValues.get(argumentKey), null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+            // float
+            case("F"):
+                if(floatValues.containsKey(classMethodKey)) {
+                    Map<String, Float> methodValues = floatValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(Float.floatToIntBits(methodValues.get(argumentKey)), null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+            // char
+            case("C"):
+                if(charValues.containsKey(classMethodKey)) {
+                    Map<String, Character> methodValues = charValues.get(classMethodKey);
+                    if(methodValues.containsKey(argumentKey)) {
+                        currentThread.getTopFrame().setResult(methodValues.get(argumentKey).charValue(), null);
+                        currentThread.setPC(enteredMethod.getLastInsn());
+                    }
+                }
+                break;
+        }
+
     }
 
-    private void dfs(ElementInfo element, ThreadInfo currentThread, String hash) {
+    private String dfs(ElementInfo element, ThreadInfo currentThread, String key) {
+        if(element == null) {
+            return key;
+        }
         for(int i = 0; i < element.getNumberOfFields(); i++) {
             FieldInfo info = element.getFieldInfo(i);
-            System.out.println(info.getName());
             if(info.isReference()) {
                 int ref = element.getReferenceField(info);
                 ElementInfo e = currentThread.getHeap().get(ref);
-                dfs(e, currentThread, hash);
+                dfs(e, currentThread, key);
             } else {
-                System.out.println(element.getIntField(info));
-                //hash += "VALUE";
+                if(info.isIntField()) {
+                    key += info.getFullName() + "=" + element.getIntField(info) + ",";
+                } else if(info.isDoubleField()) {
+                    key += info.getFullName() + "=" + element.getDoubleField(info) + ",";
+                } else if(info.isBooleanField()) {
+                    key += info.getFullName() + "=" + element.getBooleanField(info) + ",";
+                } else if(info.isFloatField()) {
+                    key += info.getFullName() + "=" + element.getFloatField(info) + ",";
+                } else if(info.isLongField()) {
+                    key += info.getFullName() + "=" + element.getLongField(info);
+                } else if(info.isCharField()) {
+                    key += info.getFullName() + "=" + element.getCharField(info);
+                }
             }
         }
+        return key;
     }
 
     @Override
     public void methodExited (VM vm, ThreadInfo currentThread, MethodInfo exitedMethod) {
-        if(exitedMethod.getClassInfo().getPackageName().equals("")) {
-            if (exitedMethod.getReturnType().equals("I")) {
-                System.out.println(exitedMethod.getName());
-                System.out.println(currentThread.getTopFrame().getResult());
-            }
+        if(isMemoizedFunction(exitedMethod)) {
+            System.out.println("EXIT KEY = " + argumentKey);
+//            System.out.println(exitedMethod.getName());
+//            int result = currentThread.getTopFrame().getResult();
+//            currentThread.getTopFrame().setResult(result, null);
+            //System.out.println("RESULT = " + result);
         }
+    }
+
+    private boolean isMemoizedFunction(MethodInfo method) {
+        String packageName = method.getClassInfo().getPackageName();
+        String returnType = method.getReturnType();
+        return !packageName.startsWith("java.") &&
+                !packageName.startsWith("sun.") &&
+                !packageName.startsWith("gov.") &&
+                primitiveReturnTypes.contains(returnType);
     }
 
 }
