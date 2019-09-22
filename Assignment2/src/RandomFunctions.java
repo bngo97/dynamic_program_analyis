@@ -1,4 +1,4 @@
-public class SimpleCalculator {
+public class RandomFunctions {
 
     public static int add(int a, int b) {
         return a + b;

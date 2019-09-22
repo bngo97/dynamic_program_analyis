@@ -1,9 +1,11 @@
 public class B {
 
-    int z;
+    int y;
+    C c;
 
     public B() {
-        z = 1;
+        y = 1;
+        c = new C();
     }
 
 }

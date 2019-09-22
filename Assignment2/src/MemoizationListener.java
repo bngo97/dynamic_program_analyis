@@ -69,7 +69,6 @@ public class MemoizationListener extends ListenerAdapter {
         String methodName = enteredMethod.getName();
         String classMethodKey = className + "," + methodName;
 
-        String returnType = enteredMethod.getReturnType();
 //        System.out.println("KEY = "+ argumentKey);
 
         switch (enteredMethod.getReturnType()) {
@@ -146,7 +145,7 @@ public class MemoizationListener extends ListenerAdapter {
             if(info.isReference()) {
                 int ref = element.getReferenceField(info);
                 ElementInfo e = currentThread.getHeap().get(ref);
-                dfs(e, currentThread, key);
+                key = dfs(e, currentThread, key);
             } else {
                 if(info.isIntField()) {
                     key += info.getFullName() + "=" + element.getIntField(info) + ",";
@@ -157,9 +156,9 @@ public class MemoizationListener extends ListenerAdapter {
                 } else if(info.isFloatField()) {
                     key += info.getFullName() + "=" + element.getFloatField(info) + ",";
                 } else if(info.isLongField()) {
-                    key += info.getFullName() + "=" + element.getLongField(info);
+                    key += info.getFullName() + "=" + element.getLongField(info) + ",";
                 } else if(info.isCharField()) {
-                    key += info.getFullName() + "=" + element.getCharField(info);
+                    key += info.getFullName() + "=" + element.getCharField(info) + ",";
                 }
             }
         }
@@ -169,7 +168,7 @@ public class MemoizationListener extends ListenerAdapter {
     @Override
     public void methodExited (VM vm, ThreadInfo currentThread, MethodInfo exitedMethod) {
         if(isMemoizedFunction(exitedMethod)) {
- //           System.out.println("EXIT KEY = " + argumentKey);
+//            System.out.println("EXIT KEY = " + argumentKey);
             String classMethodKey = exitedMethod.getClassName() + "," + exitedMethod.getName();
             switch(exitedMethod.getReturnType()) {
                 // int
