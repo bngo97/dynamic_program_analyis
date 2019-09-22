@@ -1,3 +1,3 @@
-target = SimpleTest
+target = SimpleCoverageExample
 listener = MemoizationListener
 site = /Users/bngo/.jpf/site.properties

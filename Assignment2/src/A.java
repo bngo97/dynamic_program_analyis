@@ -8,4 +8,8 @@ public class A {
         y = 0;
     }
 
+    public int sumValues(int x) {
+        return x + y + b.z;
+    }
+
 }

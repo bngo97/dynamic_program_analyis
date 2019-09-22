@@ -6,35 +6,28 @@ import gov.nasa.jpf.report.Publisher;
 import gov.nasa.jpf.report.PublisherExtension;
 import gov.nasa.jpf.vm.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class CodeCoverageListener extends ListenerAdapter implements PublisherExtension {
 
     Map<String, Set<Integer>> classLineCoverage;
-    Set<String> packages;
-
-    public CodeCoverageListener() {
-        classLineCoverage = new HashMap<>();
-        packages = new HashSet<>();
-    }
 
     public CodeCoverageListener(Config config, JPF jpf) {
-        //jpf.addPublisherExtension();
-        classLineCoverage = new HashMap<>();
-        packages = new HashSet<>();
+        classLineCoverage = new TreeMap<>(
+                (a, b) -> a.toLowerCase().compareTo(b.toLowerCase())
+        );
         jpf.addPublisherExtension(ConsolePublisher.class, this);
     }
-
-    // java.*, gov.*, sun.*, java.*
 
     @Override
     public void executeInstruction(VM vm, ThreadInfo currentThread, Instruction instructionToExecute) {
         MethodInfo mi = currentThread.getTopFrameMethodInfo();
-        String methodName = mi.getName();
         ClassInfo ci = mi.getClassInfo();
         String className = ci.getName();
         String packageName = ci.getPackageName();
-        packages.add(ci.getPackageName());
         if(filterPackageName(packageName)) {
             int lineNumber = instructionToExecute.getLineNumber();
             Set<Integer> lineNumbers = classLineCoverage.getOrDefault(className, new TreeSet<Integer>());
@@ -46,7 +39,7 @@ public class CodeCoverageListener extends ListenerAdapter implements PublisherEx
     private boolean filterPackageName(String packageName) {
         return !packageName.startsWith("java.") &&
                 !packageName.startsWith("sun.") &&
-                !packageName.startsWith("gov.nasa.jpf");
+                !packageName.startsWith("gov.");
     }
 
     @Override
@@ -55,8 +48,19 @@ public class CodeCoverageListener extends ListenerAdapter implements PublisherEx
     }
 
     private void writeCoverageResults() {
-        System.out.println(packages);
-        System.out.println(classLineCoverage);
+        try {
+            PrintWriter pw = new PrintWriter(new File("coverage.txt"));
+            for(Map.Entry<String, Set<Integer>> coverages : classLineCoverage.entrySet()) {
+                pw.println(coverages.getKey() + " class covered lines:");
+                for(Integer line : coverages.getValue()) {
+                    pw.println(line);
+                }
+                pw.println();
+            }
+            pw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 }
