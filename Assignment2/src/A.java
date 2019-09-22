@@ -17,6 +17,7 @@ public class A {
     }
 
     public int sumValues(int x) {
+        System.out.println("METHOD CALLED");
         return x + y + b.z;
     }
 

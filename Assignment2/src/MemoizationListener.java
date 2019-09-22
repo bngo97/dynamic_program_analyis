@@ -1,4 +1,3 @@
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import gov.nasa.jpf.ListenerAdapter;
 import gov.nasa.jpf.vm.*;
 
@@ -71,7 +70,7 @@ public class MemoizationListener extends ListenerAdapter {
         String classMethodKey = className + "," + methodName;
 
         String returnType = enteredMethod.getReturnType();
-        System.out.println("KEY = "+ argumentKey);
+//        System.out.println("KEY = "+ argumentKey);
 
         switch (enteredMethod.getReturnType()) {
             // int
@@ -170,7 +169,7 @@ public class MemoizationListener extends ListenerAdapter {
     @Override
     public void methodExited (VM vm, ThreadInfo currentThread, MethodInfo exitedMethod) {
         if(isMemoizedFunction(exitedMethod)) {
-            System.out.println("EXIT KEY = " + argumentKey);
+ //           System.out.println("EXIT KEY = " + argumentKey);
             String classMethodKey = exitedMethod.getClassName() + "," + exitedMethod.getName();
             switch(exitedMethod.getReturnType()) {
                 // int
