@@ -2,8 +2,8 @@ public class C {
 
     int z;
 
-    public C() {
-        z = 10;
+    public C(int z) {
+        this.z = z;
     }
 
 }

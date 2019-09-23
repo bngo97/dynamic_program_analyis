@@ -2,9 +2,8 @@
 public class SimpleCoverageExample {
 
     public static void main(String[] args) throws IllegalAccessException {
-        A a = new A();
-        a.b.c.z = 5;
-        int sum = a.sumValues(0);
+        A a = new A(1,2,3);
+        int sum = a.sumValues(4);
         if(sum < 0) {
             sum *= -1;
         }
@@ -13,6 +12,7 @@ public class SimpleCoverageExample {
         int multiply = RandomFunctions.multiply(1, 1);
         int sub = RandomFunctions.sub(add, multiply);
         RandomFunctions.sub(sub, sub);
+        RandomFunctions.areaTriangle(10.0, 10.0);
 
         int[] arr = {1, 2, 3, 4, 5};
         SortTools.find(arr, 5, 3);

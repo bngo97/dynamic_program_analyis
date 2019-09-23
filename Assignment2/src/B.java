@@ -3,9 +3,9 @@ public class B {
     int y;
     C c;
 
-    public B() {
-        y = 1;
-        c = new C();
+    public B(int y, int z) {
+        this.y = y;
+        c = new C(z);
     }
 
 }
