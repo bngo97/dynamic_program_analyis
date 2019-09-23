@@ -1,13 +1,21 @@
-public class SimpleMemoizationExample {
+public class ExampleRunner {
 
     public static void main(String[] args) {
+        // Code Coverage Tests
+        int add = RandomFunctions.add(1, 1);
+        int multiply = RandomFunctions.multiply(1, 1);
+        RandomFunctions.sub(add, multiply);
+
+        // Memoization Tests
         A a = new A(5, 10, 15);
         a.sumValues(0);
         a.sumValues(0);
 
         a = new A(5, 10, 15);
-        a.sumValues(0);
-
+        int x = 0;
+        if(a.sumValues(0) > 0) {
+            x--;
+        }
         System.out.println("Instance method int A.sumValues() called 3 times, executed " + a.callCount + " time");
 
         RandomFunctions.charAt("Hello!", 0);
