@@ -60,7 +60,7 @@ public class MemoizationListener extends ListenerAdapter {
         for(Object o : args) {
             if(o instanceof DynamicElementInfo) {
                 DynamicElementInfo element = (DynamicElementInfo) o;
-                dfs(element, currentThread, argumentKey);
+                argumentKey = dfs(element, currentThread, argumentKey);
             } else {
                 argumentKey += o + ",";
             }
@@ -139,6 +139,9 @@ public class MemoizationListener extends ListenerAdapter {
     private String dfs(ElementInfo element, ThreadInfo currentThread, String key) {
         if(element == null) {
             return key;
+        }
+        if(element.isStringObject()) {
+            return key + element.asString() + ",";
         }
         for(int i = 0; i < element.getNumberOfFields(); i++) {
             FieldInfo info = element.getFieldInfo(i);

@@ -8,7 +8,7 @@ public class A {
     float f;
     char c;
 
-    int callCount;
+    static int callCount = 0;
 
     public A(int x, int y, int z) {
         b = new B(y, z);
@@ -18,7 +18,6 @@ public class A {
         l = 1L;
         f = 0.69f;
         c = 'c';
-        callCount = 0;
     }
 
     public int sumValues(int a) {
