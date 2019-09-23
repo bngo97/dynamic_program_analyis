@@ -69,8 +69,6 @@ public class MemoizationListener extends ListenerAdapter {
         String methodName = enteredMethod.getName();
         String classMethodKey = className + "," + methodName;
 
-//        System.out.println("KEY = "+ argumentKey);
-
         switch (enteredMethod.getReturnType()) {
             // int
             case("I"):
@@ -171,7 +169,6 @@ public class MemoizationListener extends ListenerAdapter {
     @Override
     public void methodExited (VM vm, ThreadInfo currentThread, MethodInfo exitedMethod) {
         if(isMemoizedFunction(exitedMethod)) {
-//            System.out.println("EXIT KEY = " + argumentKey);
             String classMethodKey = exitedMethod.getClassName() + "," + exitedMethod.getName();
             switch(exitedMethod.getReturnType()) {
                 // int
