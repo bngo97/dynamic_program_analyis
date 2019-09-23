@@ -7,3 +7,5 @@ cd jpf-core
 ./gradlew
 bin/jpf +classpath=. +listener=CodeCoverageListener,MemoizationListener ExampleRunner
 mv coverage.txt ../
+cd ..
+rm -rf jpf-core
