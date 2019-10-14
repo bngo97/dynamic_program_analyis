@@ -10,7 +10,7 @@ import java.nio.file.Files;
 public class CfgVisitor extends ClassVisitor {
 
     public static void main(String[] args) throws IOException {
-        byte[] code = Files.readAllBytes(new File("src/SampleTest.class").toPath());
+        byte[] code = Files.readAllBytes(new File("tst/TestIfElse.class").toPath());
         ClassReader reader = new ClassReader(code);
         ClassNode classNode = new ClassNode();
         reader.accept(classNode, 0);
@@ -18,15 +18,15 @@ public class CfgVisitor extends ClassVisitor {
         InsnList instructions = main.instructions;
         for (int m_i = 0; m_i < instructions.size(); m_i++) {
             AbstractInsnNode instruction = instructions.get(m_i);
-            if(instruction instanceof LabelNode) {
+            if(instruction instanceof jdk.internal.org.objectweb.asm.tree.LabelNode) {
                 //System.out.println(instruction.getClass());
-                LabelNode labelNode = (LabelNode) instruction;
+                jdk.internal.org.objectweb.asm.tree.LabelNode labelNode = (jdk.internal.org.objectweb.asm.tree.LabelNode) instruction;
                 Label label = labelNode.getLabel();
                 System.out.println(label);
                 //labelNode.getLabel().getOffset();
             } else if(instruction instanceof JumpInsnNode) {
                 JumpInsnNode node = (JumpInsnNode) instruction;
-                LabelNode labelNode = node.label;
+                jdk.internal.org.objectweb.asm.tree.LabelNode labelNode = node.label;
                 if(node.getOpcode() == Opcodes.GOTO) {
                     System.out.println("GO TO " +  labelNode.getLabel());
                 } else {
@@ -43,6 +43,7 @@ public class CfgVisitor extends ClassVisitor {
         reader.accept(cv, 0);
     }
 
+
     public CfgVisitor(ClassNode cn) {
         super(Opcodes.ASM5, cn);
     }
@@ -51,7 +52,7 @@ public class CfgVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
         if(!name.equals("<init>")) {
-            mv = new CfgMethodVisitor(mv, name);
+            mv = new CfgMethodVisitorV2(mv, name);
         }
         return mv;
     }

@@ -1,12 +1,7 @@
 import jdk.internal.org.objectweb.asm.*;
-import jdk.internal.org.objectweb.asm.tree.AbstractInsnNode;
-import jdk.internal.org.objectweb.asm.tree.ClassNode;
-
 import java.util.*;
 
 public class CfgMethodVisitor extends MethodVisitor {
-    // LOOK AT JUMP INSTRUCTIONS
-    // LOOK AT LABEL
     String methodName;
     Map<Label, BasicBlock> basicBlocks;
     List<BasicBlock> blocks;
@@ -21,9 +16,6 @@ public class CfgMethodVisitor extends MethodVisitor {
         basicBlocks = new HashMap<>();
         blocks = new ArrayList<>();
         blockIdx = 0;
-        //BasicBlock block = new BasicBlock();
-        //basicBlocks.put(null, block);
-        //prevBlock = block;
     }
 
     @Override
@@ -35,7 +27,7 @@ public class CfgMethodVisitor extends MethodVisitor {
     public void visitLabel(Label label) {
         super.visitLabel(label);
         System.out.println(label);
-        // JUMPED TO OR CAME FORM JUMP
+        // JUMPED TO OR CAME FROM JUMP
         if(prevInstructionWasLabel && !basicBlocks.containsKey(label) && !prevBlock.jumpedTo) {
             basicBlocks.put(label, prevBlock);
             return;
@@ -92,7 +84,7 @@ public class CfgMethodVisitor extends MethodVisitor {
     public void visitEnd() {
         super.visitEnd();
         System.out.println();
-        System.out.println("-----------------------------------");
+        System.out.println("--------------------------------------");
         System.out.println();
 //        List<BasicBlock> blocks = new ArrayList<>(basicBlocks.values());
 //        Collections.sort(blocks, (b1, b2) -> b1.blockId - b2.blockId);
@@ -102,4 +94,5 @@ public class CfgMethodVisitor extends MethodVisitor {
             System.out.println(block + ": " + block.connections);
         }
     }
+
 }
