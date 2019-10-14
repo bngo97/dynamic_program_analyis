@@ -3,16 +3,17 @@ import jdk.internal.org.objectweb.asm.Label;
 import java.util.List;
 import java.util.ArrayList;
 
-public class LabelNode {
+public class MyLabelNode {
 
     Label label;
     List<Label> connections;
-    LabelNode next;
-    LabelNode prev;
+    MyLabelNode next;
+    MyLabelNode prev;
     boolean jumpedTo;
     Label labelJumpedFrom;
+    boolean jumpedFrom;
 
-    public LabelNode(Label label) {
+    public MyLabelNode(Label label) {
         this.label = label;
         connections = new ArrayList<>();
     }

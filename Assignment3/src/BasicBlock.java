@@ -9,31 +9,33 @@ public class BasicBlock {
 
     int blockId;
     Label label;
-    Set<Label> labels;
+    List<Label> labels;
     List<BasicBlock> connections;
     boolean jumpedTo;
     BasicBlock next;
     BasicBlock prev;
 
     public BasicBlock() {
-        labels = new HashSet<>();
+        blockId = -1;
+        labels = new ArrayList<>();
         connections = new ArrayList<>();
     }
 
     public BasicBlock(int id) {
-        labels = new HashSet<>();
+        labels = new ArrayList<>();
         connections = new ArrayList<>();
         this.blockId = id;
     }
 
     public BasicBlock(Label l) {
-        labels = new HashSet<>();
+        blockId = -1;
+        labels = new ArrayList<>();
         connections = new ArrayList<>();
         this.label = l;
     }
 
     public BasicBlock(int id, Label l) {
-        labels = new HashSet<>();
+        labels = new ArrayList<>();
         connections = new ArrayList<>();
         this.blockId = id;
         this.label = l;

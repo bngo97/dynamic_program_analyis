@@ -8,16 +8,16 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
 
     String methodName;
 
-    List<LabelNode> labelNodes;
-    Map<Label,LabelNode> labels;
+    List<MyLabelNode> labelNodes;
+    Map<Label, MyLabelNode> labels;
 
-    LabelNode prevLabel;
+    MyLabelNode prevLabel;
     boolean skipLabel;
     List<BasicBlock> blocks;
     Map<Label, BasicBlock> labelBlocks;
 
     public CfgMethodVisitorV2(MethodVisitor mv, String name) {
-        super(Opcodes.ASM5, mv);
+        super(Opcodes.ASM5);
         methodName = name;
         labelNodes = new ArrayList<>();
         labels = new HashMap<>();
@@ -28,11 +28,10 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
     @Override
     public void visitLabel(Label label) {
         System.out.println(label);
-        super.visitLabel(label);
         if(!labels.containsKey(label)) {
-            labels.put(label, new LabelNode(label));
+            labels.put(label, new MyLabelNode(label));
         }
-        LabelNode node = labels.get(label);
+        MyLabelNode node = labels.get(label);
         labelNodes.add(node);
         if(!skipLabel) {
             if(prevLabel != null) {
@@ -54,10 +53,11 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
         }
         super.visitJumpInsn(opcode, label);
         if(!labels.containsKey(label)) {
-            labels.put(label, new LabelNode(label));
+            labels.put(label, new MyLabelNode(label));
         }
-        LabelNode node = labels.get(label);
+        MyLabelNode node = labels.get(label);
         node.jumpedTo = true;
+        prevLabel.jumpedFrom = true;
         prevLabel.connections.add(label);
         if(opcode == Opcodes.GOTO) {
             skipLabel = true;
@@ -66,24 +66,23 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
 
     @Override
     public void visitTableSwitchInsn(int i, int i1, Label label, Label... labels) {
-        super.visitTableSwitchInsn(i, i1, label, labels);
         for(Label l : labels) {
             if(!this.labels.containsKey(l)) {
-                LabelNode node = new LabelNode(l);
+                MyLabelNode node = new MyLabelNode(l);
                 node.jumpedTo = true;
                 prevLabel.connections.add(l);
             }
         }
         if(!this.labels.containsKey(label)) {
-            LabelNode node = new LabelNode(label);
+            MyLabelNode node = new MyLabelNode(label);
             node.jumpedTo = true;
             prevLabel.connections.add(label);
         }
+        prevLabel.jumpedFrom = true;
     }
 
     @Override
     public void visitEnd() {
-        super.visitEnd();
         System.out.println();
         System.out.println("--------------------------------------");
         System.out.println();
@@ -95,7 +94,7 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
         System.out.println();
         System.out.println("--------------------------------------");
         System.out.println();
-        for(LabelNode node : labelNodes) {
+        for(MyLabelNode node : labelNodes) {
             if(node.jumpedTo) {
                 System.out.println(node);
             } else {
@@ -107,13 +106,84 @@ public class CfgMethodVisitorV2 extends MethodVisitor {
     public void mergeBlocks() {
         int idx = 0;
         BasicBlock currBlock = new BasicBlock(idx++);
-        for(LabelNode label : labelNodes) {
-            if(label.jumpedTo || (label.prev != null && label.prev.connections.size() > 1)) {
-                blocks.add(currBlock);
-                currBlock = new BasicBlock(idx++, label.label);
+
+        for(MyLabelNode label : labelNodes) {
+            if(!label.jumpedTo && label.prev != null && !label.prev.jumpedFrom) {
+                labelBlocks.put(label.label, currBlock);
+                System.out.println("label " + label + " -> " + labelBlocks);
             }
-            labelBlocks.put(label.label, currBlock);
-            currBlock.labels.add(label.label);
+            if(label.jumpedFrom) {
+                System.out.println("WTF " + label);
+                if(!labelBlocks.containsKey(label.label)) {
+                    labelBlocks.put(label.label, new BasicBlock(idx++, label.label));
+                }
+                blocks.add(currBlock);
+                currBlock = labelBlocks.get(label.label);
+                if(currBlock.blockId == -1) {
+                    currBlock.blockId = idx++;
+                }
+                for(Label l : label.connections) {
+                    if(!labelBlocks.containsKey(l)) {
+                        labelBlocks.put(l, new BasicBlock(l));
+                    }
+                    currBlock.connections.add(labelBlocks.get(l));
+                }
+            } else if(label.jumpedTo) {
+                blocks.add(currBlock);
+                if(!labelBlocks.containsKey(label.label)) {
+                    labelBlocks.put(label.label, new BasicBlock(idx++, label.label));
+                }
+                currBlock = labelBlocks.get(label.label);
+                if(currBlock.blockId == -1) {
+                    currBlock.blockId = idx++;
+                }
+                for(Label l : label.connections) {
+                    if(labels.get(l).jumpedTo) {
+                        if(!labelBlocks.containsKey(l)) {
+                            labelBlocks.put(l, new BasicBlock(l));
+                        }
+                        currBlock.connections.add(labelBlocks.get(l));
+                    }
+                }
+            }
+            else if(label.connections.size() == 1) {
+                Label nextLabel = label.connections.get(0);
+                MyLabelNode nextLabelNode = labels.get(nextLabel);
+                if(nextLabelNode.jumpedTo) {
+                    if(!labelBlocks.containsKey(nextLabel)) {
+                        labelBlocks.put(nextLabel, new BasicBlock(nextLabel));
+                    }
+                    currBlock.connections.add(labelBlocks.get(nextLabel));
+                }
+            }
+
+//            if(labelBlocks.containsKey(label)) {
+//                blocks.add(currBlock);
+//                //currBlock.connections.add(labelBlocks.get(label));
+//                currBlock = labelBlocks.get(label);
+//                if(currBlock.blockId == -1) {
+//                    currBlock.blockId = idx++;
+//                }
+//            } else if(label.jumpedTo) {
+//                blocks.add(currBlock);
+//                currBlock = new BasicBlock(idx++, label.label);
+//                labelBlocks.put(label.label, currBlock);
+//            }
+//            if(label.connections.size() > 1) {
+//                for(Label l : label.connections) {
+//                    if(!labelBlocks.containsKey(l)) {
+//                        labelBlocks.put(l, new BasicBlock());
+//                    }
+//                }
+//            }
+//            if(label.jumpedTo || (label.prev != null && label.prev.connections.size() > 1)) {
+//                blocks.add(currBlock);
+//                currBlock = new BasicBlock(idx++, label.label);
+//            }
+//            labelBlocks.put(label.label, currBlock);
+            if(currBlock != null) {
+                currBlock.labels.add(label.label);
+            }
         }
         blocks.add(currBlock);
     }
