@@ -1,4 +1,4 @@
-import jdk.internal.org.objectweb.asm.Label;
+import org.objectweb.asm.Label;
 
 import java.util.HashSet;
 import java.util.List;
