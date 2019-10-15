@@ -7,22 +7,32 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.*;
 
+/*
+    I determine control flow graph using two passes through the methods instructions.
+    The first pass collects all the jump, label, and switch statements and determines where the jumps are.
+    The second pass uses this information to build basic blocks in the order in which they appear.
+ */
 public class CfgMethodVisitor extends MethodVisitor {
 
     String methodName;
+    String outputFile;
+
     Set<Label> jumpedToLabels;
-    Map<Label, BasicBlock> blocks;
     List<Instruction> instructions;
 
-    String outputFile;
+    Map<Label, BasicBlock> blocks;
+    BasicBlock prevBlock;
+    Instruction prevInstruction;
+    int blockIdx;
 
     public CfgMethodVisitor(String name, String outputFile) {
         super(Opcodes.ASM5);
-        methodName = name;
+        this.methodName = name;
         this.outputFile = outputFile;
-        jumpedToLabels = new HashSet<>();
-        blocks = new HashMap<>();
-        instructions = new ArrayList<>();
+        this.jumpedToLabels = new HashSet<>();
+        this.blocks = new HashMap<>();
+        this.instructions = new ArrayList<>();
+        this.blockIdx = 0;
     }
 
     @Override
@@ -47,7 +57,7 @@ public class CfgMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitEnd() {
-        blockIdx = 0;
+        // second pass of label and jump instructions
         for(Instruction instruction : instructions) {
             if(instruction instanceof LabelInstruction) {
                 LabelInstruction labelInstruction = (LabelInstruction) instruction;
@@ -84,10 +94,6 @@ public class CfgMethodVisitor extends MethodVisitor {
             e.printStackTrace();
         }
     }
-
-    BasicBlock prevBlock;
-    Instruction prevInstruction;
-    int blockIdx;
 
     public void visitLabel(LabelInstruction instruction) {
         Label label = instruction.label;
