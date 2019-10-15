@@ -1,2 +1,1 @@
-abstract public class Instruction {
-}
+abstract public class Instruction {}

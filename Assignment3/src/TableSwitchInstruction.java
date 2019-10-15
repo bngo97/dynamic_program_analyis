@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TableSwitchInstruction extends Instruction {
-    int i; int i1;
+
+    int i;
+    int i1;
     Label label;
     List<Label> labels;
 
