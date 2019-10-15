@@ -40,12 +40,11 @@ public class CfgVisitor extends ClassVisitor {
             }
         }
 
-//        System.out.println();
-//        System.out.println("-----------------------------------");
-//        System.out.println();
+        System.out.println();
+        System.out.println("-----------------------------------");
+        System.out.println();
         CfgVisitor cv = new CfgVisitor();
         reader.accept(cv, 0);
-
     }
 
     public static Set<Label> getJumpedToLabels(InsnList instructions) {
@@ -70,7 +69,7 @@ public class CfgVisitor extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
         if(!name.equals("<init>")) {
-            mv = new CfgMethodVisitorV2(mv, name);
+            mv = new CfgMethodVisitorV3(name);
         }
         return mv;
     }
