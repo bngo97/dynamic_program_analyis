@@ -2,6 +2,9 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.*;
 
 public class CfgMethodVisitor extends MethodVisitor {
@@ -11,9 +14,12 @@ public class CfgMethodVisitor extends MethodVisitor {
     Map<Label, BasicBlock> blocks;
     List<Instruction> instructions;
 
-    public CfgMethodVisitor(String name) {
+    String outputFile;
+
+    public CfgMethodVisitor(String name, String outputFile) {
         super(Opcodes.ASM5);
         methodName = name;
+        this.outputFile = outputFile;
         jumpedToLabels = new HashSet<>();
         blocks = new HashMap<>();
         instructions = new ArrayList<>();
@@ -57,10 +63,25 @@ public class CfgMethodVisitor extends MethodVisitor {
         }
         List<BasicBlock> blockList = new ArrayList<>(blocks.values());
         Collections.sort(blockList, (b1, b2) -> b1.blockId - b2.blockId);
-        for(BasicBlock block : blockList) {
-            List<BasicBlock> connections = new ArrayList<>(block.connections);
-            Collections.sort(connections, (b1, b2) -> b1.blockId - b2.blockId);
-            System.out.println(block + ": " + connections);
+        writeResult();
+    }
+
+    public void writeResult() {
+        try {
+            PrintWriter pw = new PrintWriter(new File(outputFile));
+            List<BasicBlock> blockList = new ArrayList<>(blocks.values());
+            Collections.sort(blockList, (b1, b2) -> b1.blockId - b2.blockId);
+            for(BasicBlock block : blockList) {
+                List<BasicBlock> connections = new ArrayList<>(block.connections);
+                Collections.sort(connections, (b1, b2) -> b1.blockId - b2.blockId);
+                String connectionsString = connections.toString()
+                        .replace("[","")
+                        .replace("]","");
+                pw.println(block + " => " + connectionsString);
+            }
+            pw.close();
+        } catch(FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 

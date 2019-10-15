@@ -10,21 +10,31 @@ import java.nio.file.Files;
 public class CfgVisitor extends ClassVisitor {
 
     public static void main(String[] args) throws IOException {
-        byte[] code = Files.readAllBytes(new File("../tst/TestMultipleStatements.class").toPath());
+        if(args.length == 0) {
+            throw new RuntimeException("No input files given!");
+        }
+        byte[] code = Files.readAllBytes(new File(args[0]).toPath());
         ClassReader reader = new ClassReader(code);
-        CfgVisitor cv = new CfgVisitor();
+        CfgVisitor cv = new CfgVisitor(args[0]);
         reader.accept(cv, 0);
     }
 
-    public CfgVisitor() {
+    String classFile;
+    String outputFile;
+
+    public CfgVisitor(String classFile) {
         super(Opcodes.ASM5);
+        this.classFile = classFile;
+        int idx1 = classFile.lastIndexOf('/') + 1;
+        int idx2 = classFile.indexOf(".class");
+        this.outputFile = "results/" + classFile.substring(idx1, idx2) + ".txt";
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
         if(!name.equals("<init>")) {
-            mv = new CfgMethodVisitor(name);
+            mv = new CfgMethodVisitor(name, outputFile);
         }
         return mv;
     }

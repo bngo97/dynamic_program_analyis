@@ -1,0 +1,6 @@
+BB0 => BB1, BB2, BB3, BB4
+BB1 => BB5
+BB2 => BB5
+BB3 => BB5
+BB4 => BB5
+BB5 => 
