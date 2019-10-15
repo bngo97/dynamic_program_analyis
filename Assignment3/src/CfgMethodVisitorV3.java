@@ -57,6 +57,7 @@ public class CfgMethodVisitorV3 extends MethodVisitor {
                     System.out.println("JUMP TO " + jumpInstruction.label);
                 }
             } else if(instruction instanceof TableSwitchInstruction) {
+                System.out.println("SWITCH");
                 TableSwitchInstruction switchInstruction = (TableSwitchInstruction) instruction;
                 visitSwitch(switchInstruction);
             }
