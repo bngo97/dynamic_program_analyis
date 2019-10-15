@@ -12,7 +12,7 @@ import java.util.Set;
 public class CfgVisitor extends ClassVisitor {
 
     public static void main(String[] args) throws IOException {
-        byte[] code = Files.readAllBytes(new File("tst/TestForLoop.class").toPath());
+        byte[] code = Files.readAllBytes(new File("tst/TestDoWhile.class").toPath());
         ClassReader reader = new ClassReader(code);
         ClassNode classNode = new ClassNode();
         reader.accept(classNode, 0);

@@ -104,5 +104,6 @@ public class CfgMethodVisitorV3 extends MethodVisitor {
     }
 
     public void visitSwitch(TableSwitchInstruction instruction) {
+        
     }
 }
