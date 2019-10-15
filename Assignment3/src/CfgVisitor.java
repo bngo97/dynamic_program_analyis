@@ -12,14 +12,12 @@ import java.util.Set;
 public class CfgVisitor extends ClassVisitor {
 
     public static void main(String[] args) throws IOException {
-        byte[] code = Files.readAllBytes(new File("tst/TestDoWhile.class").toPath());
+        byte[] code = Files.readAllBytes(new File("tst/TestSwitchBreak.class").toPath());
         ClassReader reader = new ClassReader(code);
         ClassNode classNode = new ClassNode();
         reader.accept(classNode, 0);
         MethodNode main = classNode.methods.get(1);
         InsnList instructions = main.instructions;
-        Set<Label> jumpedToLabels = getJumpedToLabels(instructions);
-
         AbstractInsnNode prevInstruction = null;
         for (int m_i = 0; m_i < instructions.size(); m_i++) {
             AbstractInsnNode instruction = instructions.get(m_i);
@@ -47,18 +45,6 @@ public class CfgVisitor extends ClassVisitor {
         reader.accept(cv, 0);
     }
 
-    public static Set<Label> getJumpedToLabels(InsnList instructions) {
-        Set<Label> jumpedToLabels = new HashSet<>();
-        for(int m_i = 0; m_i < instructions.size(); m_i++) {
-            AbstractInsnNode instruction = instructions.get(m_i);
-            if(instruction instanceof JumpInsnNode) {
-                JumpInsnNode node = (JumpInsnNode) instruction;
-                LabelNode labelNode = node.label;
-                jumpedToLabels.add(labelNode.getLabel());
-            }
-        }
-        return jumpedToLabels;
-    }
 
 
     public CfgVisitor() {

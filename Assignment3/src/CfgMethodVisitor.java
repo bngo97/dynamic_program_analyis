@@ -90,7 +90,8 @@ public class CfgMethodVisitor extends MethodVisitor {
 //        Collections.sort(blocks, (b1, b2) -> b1.blockId - b2.blockId);
         Collections.sort(blocks, (b1, b2) -> b1.blockId - b2.blockId);
         for(BasicBlock block : blocks) {
-            Collections.sort(block.connections, (b1, b2) -> b1.blockId - b2.blockId);
+            List<BasicBlock> connections = new ArrayList<>(block.connections);
+            Collections.sort(connections, (b1, b2) -> b1.blockId - b2.blockId);
             System.out.println(block + ": " + block.connections);
         }
     }

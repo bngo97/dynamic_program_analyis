@@ -33,6 +33,10 @@ public class CfgMethodVisitorV3 extends MethodVisitor {
     @Override
     public void visitTableSwitchInsn(int i, int i1, Label label, Label... labels) {
         instructions.add(new TableSwitchInstruction(i, i1, label, labels));
+        for(Label l : labels ) {
+            jumpedToLabels.add(l);
+        }
+        jumpedToLabels.add(label);
     }
 
     @Override
@@ -65,8 +69,9 @@ public class CfgMethodVisitorV3 extends MethodVisitor {
         List<BasicBlock> blockList = new ArrayList<>(blocks.values());
         Collections.sort(blockList, (b1, b2) -> b1.blockId - b2.blockId);
         for(BasicBlock block : blockList) {
-            Collections.sort(block.connections, (b1, b2) -> b1.blockId - b2.blockId);
-            System.out.println(block + ": " + block.connections);
+            List<BasicBlock> connections = new ArrayList<>(block.connections);
+            Collections.sort(connections, (b1, b2) -> b1.blockId - b2.blockId);
+            System.out.println(block + ": " + connections);
         }
     }
 
@@ -104,6 +109,23 @@ public class CfgMethodVisitorV3 extends MethodVisitor {
     }
 
     public void visitSwitch(TableSwitchInstruction instruction) {
-        
+        if(prevBlock == null) {
+            return;
+        }
+        for(Label label : instruction.labels) {
+            if(!blocks.containsKey(label)) {
+                blocks.put(label, new BasicBlock(label));
+            }
+            BasicBlock block = blocks.get(label);
+            block.jumpedTo = true;
+            prevBlock.connections.add(blocks.get(label));
+        }
+        Label label = instruction.label;
+        if(!blocks.containsKey(label)) {
+            blocks.put(label, new BasicBlock(label));
+        }
+        BasicBlock block = blocks.get(label);
+        block.jumpedTo = true;
+        prevBlock.connections.add(blocks.get(label));
     }
 }
