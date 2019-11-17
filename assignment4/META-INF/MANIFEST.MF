@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Agent-Class: DemoAgent
+Agent-Class: MethodCoverageAgent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
-Premain-Class: DemoAgent
+Premain-Class: MethodCoverageAgent
