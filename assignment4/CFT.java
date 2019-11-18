@@ -7,7 +7,7 @@ import java.security.ProtectionDomain;
 public class CFT implements ClassFileTransformer {
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (!className.contains("/")) {
+        if (!className.contains("/") && !className.equals("MethodCounter")) {
             ClassReader cr = new ClassReader(classfileBuffer);
             ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
 

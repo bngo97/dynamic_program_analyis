@@ -50,9 +50,11 @@ class MethodCoverageVisitor extends MethodVisitor {
         // 3: ldc           #4                  // String mmm
         // 5: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
 
-//        mv.visitFieldInsn(org.objectweb.asm.Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-//        mv.visitLdcInsn(methodName);
-//        mv.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitLdcInsn(methodName);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        mv.visitLdcInsn(methodName);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "Input","incrementCount", "(Ljava/lang/String;Ljava/lang/String;)V", false);
 
         super.visitCode();
     }

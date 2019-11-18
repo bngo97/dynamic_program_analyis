@@ -25,13 +25,11 @@ public class ClassMethodVisitor extends ClassVisitor {
     public ClassMethodVisitor(String className, ClassWriter cw) {
         super(Opcodes.ASM5, cw);
         this.className = className;
-        //System.out.println(className);
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-        //System.out.println(name);
         if (!name.equals("<init>")) {
             mv = new MethodCoverageVisitor(mv, className, name);
         }
@@ -52,23 +50,21 @@ class MethodCoverageVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-        // 0: getstatic     #3                  // Field java/lang/System.out:Ljava/io/PrintStream;
-        // 3: ldc           #4                  // String mmm
-        // 5: invokevirtual #5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
-
-        mv.visitFieldInsn(org.objectweb.asm.Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        if(className.equals("Input") && methodName.equals("main")) {
+            MethodCounter.initialize();
+        }
+        MethodCounter.addMethod(className, methodName);
+        mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
-        mv.visitMethodInsn(org.objectweb.asm.Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "MethodCounter","incrementCount", "(Ljava/lang/String;Ljava/lang/String;)V", false);
         super.visitCode();
     }
 
     @Override
     public void visitInsn(int opcode) {
-        //whenever we find a RETURN, we instert the code, here only crazy example code
-        if(opcode==Opcodes.RETURN && className.equals("C")){
-            //mv.visitVarInsn(Opcodes.ALOAD, 42);
-            System.out.println(className + "." + methodName);
+        // print result when before main method in Input returns
+        if(opcode==Opcodes.RETURN && className.equals("Input") && methodName.equals("main")) {
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "MethodCounter", "writeResults", "()V", false);
         }
         super.visitInsn(opcode);
     }

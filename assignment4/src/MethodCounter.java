@@ -12,10 +12,11 @@ public class MethodCounter {
     public static void incrementCount(String className, String methodName) {
         String key = className + "." + methodName;
         counts.put(key, counts.getOrDefault(key, 0));
+        System.out.println(key);
     }
 
     public static void writeResults() {
-        
+
     }
 
 }
