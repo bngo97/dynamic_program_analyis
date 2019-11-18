@@ -1,5 +1,8 @@
 import java.util.TreeMap;
 import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 
 public class MethodCounter {
 
@@ -25,6 +28,15 @@ public class MethodCounter {
     public static void writeResults() {
         //System.out.println("WRITE RESULTS");
         System.out.println(counts);
+        try {
+            PrintWriter pw = new PrintWriter(new File("results.txt"));
+            for(Map.Entry<String, Integer> entry : counts.entrySet()) {
+                pw.println(entry.getKey() + ": " + entry.getValue());
+            }
+            pw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 }

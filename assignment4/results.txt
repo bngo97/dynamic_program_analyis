@@ -1,0 +1,7 @@
+AnotherClass.divide: 1
+AnotherClass.multiply: 2
+Input.add: 1
+Input.main: 1
+Input.subtract: 1
+Lego.getX: 1
+Lego.setX: 0

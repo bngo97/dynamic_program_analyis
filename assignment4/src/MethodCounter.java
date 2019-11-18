@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +19,15 @@ public class MethodCounter {
     }
 
     public static void writeResults() {
-
+        try {
+            PrintWriter pw = new PrintWriter(new File("results.txt"));
+            for(Map.Entry<String, Integer> entry : counts.entrySet()) {
+                pw.println(entry.getKey() + ": " + entry.getValue());
+            }
+            pw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 }
