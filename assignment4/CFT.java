@@ -7,12 +7,12 @@ import java.security.ProtectionDomain;
 public class CFT implements ClassFileTransformer {
 
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
-        if (className.equals("C")) {
+        if (!className.contains("/")) {
             ClassReader cr = new ClassReader(classfileBuffer);
             ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
 
             // 2. modify the IR
-            ClassMethodVisitor tv = new ClassMethodVisitor(cw);
+            ClassMethodVisitor tv = new ClassMethodVisitor(className, cw);
             cr.accept(tv, 0);
 
             // 3. output to a file

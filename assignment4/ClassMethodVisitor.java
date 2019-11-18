@@ -14,14 +14,18 @@ public class ClassMethodVisitor extends ClassVisitor {
         byte[] code = Files.readAllBytes(new File("src/Input.class").toPath());
         ClassReader cr = new ClassReader(code);
         ClassWriter cw = new ClassWriter(cr, 0);
-        ClassMethodVisitor dv = new ClassMethodVisitor(cw);
+        ClassMethodVisitor dv = new ClassMethodVisitor("Input", cw);
         cr.accept(dv, 0);
         byte[] newCode = cw.toByteArray();
         Files.write(new File("Input.class").toPath(), newCode);
     }
 
-    public ClassMethodVisitor(ClassWriter cw) {
+    String className;
+
+    public ClassMethodVisitor(String className, ClassWriter cw) {
         super(Opcodes.ASM5, cw);
+        this.className = className;
+        //System.out.println(className);
     }
 
     @Override
@@ -29,7 +33,7 @@ public class ClassMethodVisitor extends ClassVisitor {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         //System.out.println(name);
         if (!name.equals("<init>")) {
-            mv = new MethodCoverageVisitor(mv, name);
+            mv = new MethodCoverageVisitor(mv, className, name);
         }
         return mv;
     }
@@ -37,10 +41,12 @@ public class ClassMethodVisitor extends ClassVisitor {
 }
 
 class MethodCoverageVisitor extends MethodVisitor {
+    private String className;
     private String methodName;
 
-    public MethodCoverageVisitor(MethodVisitor mv, String methodName) {
+    public MethodCoverageVisitor(MethodVisitor mv, String className, String methodName) {
         super(Opcodes.ASM5, mv);
+        this.className = className;
         this.methodName = methodName;
     }
 
@@ -56,4 +62,15 @@ class MethodCoverageVisitor extends MethodVisitor {
 
         super.visitCode();
     }
+
+    @Override
+    public void visitInsn(int opcode) {
+        //whenever we find a RETURN, we instert the code, here only crazy example code
+        if(opcode==Opcodes.RETURN && className.equals("C")){
+            //mv.visitVarInsn(Opcodes.ALOAD, 42);
+            System.out.println(className + "." + methodName);
+        }
+        super.visitInsn(opcode);
+    }
+
 }
