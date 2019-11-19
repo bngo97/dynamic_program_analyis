@@ -9,4 +9,5 @@ Dog.makeSound: 70
 Input.fib: 41
 Input.fibMemoized: 13
 Input.main: 1
+Input.neverCalled: 0
 Input.recursion: 99

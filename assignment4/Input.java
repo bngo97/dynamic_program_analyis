@@ -48,6 +48,10 @@ public class Input {
         }
     }
 
+    public static void neverCalled() {
+        System.out.println("THIS IS NEVER CALLED");
+    }
+
 }
 
 class Calculator {
