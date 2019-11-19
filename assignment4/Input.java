@@ -1,3 +1,5 @@
+import java.lang.Override;
+
 public class Input {
 
     public static void main(String[] args) {
@@ -8,6 +10,16 @@ public class Input {
         }
         fib(7);
         fibMemoized(7, new int[8]);
+        Cat cat = new Cat(10);
+        for(int i = 0; i < cat.getAge(); i++) {
+            cat.makeSound();
+        }
+        Dog dog = new Dog(10, "Retriever");
+        int age = dog.getAge();
+        while(age > 0) {
+            dog.makeSound();
+            age--;
+        }
     }
 
     public static void recursion(int x) {
@@ -65,3 +77,56 @@ class Calculator {
     }
 
 }
+
+interface Age {
+    public int getAge();
+}
+
+interface Sound {
+    public String makeSound();
+}
+
+abstract class Animal implements Age {
+    int age;
+
+    public Animal(int age) {
+        this.age = age;
+    }
+
+    @Override
+    public int getAge() {
+        return age;
+    }
+
+}
+
+class Dog extends Animal implements Sound {
+    String breed;
+
+    public Dog(int age, String breed) {
+        super(age);
+        this.breed = breed;
+    }
+
+    @Override
+    public int getAge() {
+        return 7 * age;
+    }
+
+    @Override
+    public String makeSound() {
+        return "bark";
+    }
+}
+
+class Cat extends Animal implements Sound {
+    public Cat(int age) {
+        super(age);
+    }
+
+    @Override
+    public String makeSound() {
+        return "meow";
+    }
+}
+

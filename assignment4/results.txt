@@ -1,7 +1,11 @@
+Animal.getAge: 11
 Calculator.add: 10
 Calculator.divide: 1
 Calculator.multiply: 1
 Calculator.subtract: 5
+Cat.makeSound: 10
+Dog.getAge: 1
+Dog.makeSound: 70
 Input.fib: 41
 Input.fibMemoized: 13
 Input.main: 1
