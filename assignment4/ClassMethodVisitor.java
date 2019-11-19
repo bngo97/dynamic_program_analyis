@@ -10,16 +10,6 @@ import java.nio.file.Files;
 
 public class ClassMethodVisitor extends ClassVisitor {
 
-    public static void main(String[] args) throws IOException {
-        byte[] code = Files.readAllBytes(new File("src/Input.class").toPath());
-        ClassReader cr = new ClassReader(code);
-        ClassWriter cw = new ClassWriter(cr, 0);
-        ClassMethodVisitor dv = new ClassMethodVisitor("Input", cw);
-        cr.accept(dv, 0);
-        byte[] newCode = cw.toByteArray();
-        Files.write(new File("Input.class").toPath(), newCode);
-    }
-
     String className;
 
     public ClassMethodVisitor(String className, ClassWriter cw) {
