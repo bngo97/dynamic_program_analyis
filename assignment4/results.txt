@@ -1,7 +1,7 @@
 Animal.getAge: 11
-Calculator.add: 10
+Calculator.add: 20
 Calculator.divide: 1
-Calculator.multiply: 1
+Calculator.multiply: 2
 Calculator.subtract: 5
 Cat.makeSound: 10
 Dog.getAge: 1

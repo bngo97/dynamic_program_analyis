@@ -23,7 +23,6 @@ public class MethodCounter {
     }
 
     public static void writeResults() {
-        System.out.println(counts);
         try {
             PrintWriter pw = new PrintWriter(new File("results.txt"));
             for(Map.Entry<String, Integer> entry : counts.entrySet()) {
