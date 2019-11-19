@@ -36,13 +36,13 @@ class MethodCoverageVisitor extends MethodVisitor {
         super(Opcodes.ASM5, mv);
         this.className = className;
         this.methodName = methodName;
+        if(className.equals("Input") && methodName.equals("main")) {
+            MethodCounter.initialize();
+        }
     }
 
     @Override
     public void visitCode() {
-        if(className.equals("Input") && methodName.equals("main")) {
-            MethodCounter.initialize();
-        }
         MethodCounter.addMethod(className, methodName);
         mv.visitLdcInsn(className);
         mv.visitLdcInsn(methodName);
@@ -52,7 +52,7 @@ class MethodCoverageVisitor extends MethodVisitor {
 
     @Override
     public void visitInsn(int opcode) {
-        // print result when before main method in Input returns
+        // print result before main method in Input returns
         if(opcode==Opcodes.RETURN && className.equals("Input") && methodName.equals("main")) {
             mv.visitMethodInsn(Opcodes.INVOKESTATIC, "MethodCounter", "writeResults", "()V", false);
         }
