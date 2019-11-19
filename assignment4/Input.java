@@ -1,48 +1,46 @@
 public class Input {
 
     public static void main(String[] args) {
-        add(0,0);
-        subtract(0,0);
-        AnotherClass.divide(0,0);
+        Calculator.multiply(10,10);
+        Calculator.divide(55, 10);
+        for(int i = 0; i < 9; i++) {
+            recursion(10);
+        }
     }
 
-    public static void add(int x1, int x2) {
-        AnotherClass.multiply(0, 0);
-    }
-
-    public static int subtract(int x1, int x2) {
-        AnotherClass.multiply(0,0);
-        return x1 - x2;
-    }
-}
-
-class AnotherClass {
-
-    public static void multiply(int x1, int x2) {
-    }
-
-    public static void divide(int x1, int x2) {
-        Lego lego = new Lego(x1);
-        lego.getX();
+    public static void recursion(int x) {
+        if(x <= 0) {
+            return;
+        }
+        recursion(x - 1);
     }
 
 }
 
-class Lego {
+class Calculator {
 
-    int x;
-
-    public Lego(int x) {
-        this.x = x;
-        System.out.println("CONSTRUCTOR");
+    public static int add(int x, int y) {
+        return x + y;
     }
 
-    public int getX() {
-        return x;
+    public static int subtract(int x, int y) {
+        return x - y;
     }
 
-    public void setX(int x) {
-        this.x = x;
+    public static int multiply(int x, int y) {
+        int result = 0;
+        for(int i = 0; i < y; i++) {
+            result = add(result, x);
+        }
+        return result;
+    }
+
+    public static int divide(int x, int y) {
+        int cnt = 0;
+        while(x > y) {
+            x = subtract(x, y);
+        }
+        return cnt;
     }
 
 }

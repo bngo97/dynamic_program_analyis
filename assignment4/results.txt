@@ -1,7 +1,6 @@
-AnotherClass.divide: 1
-AnotherClass.multiply: 2
-Input.add: 1
+Calculator.add: 10
+Calculator.divide: 1
+Calculator.multiply: 1
+Calculator.subtract: 5
 Input.main: 1
-Input.subtract: 1
-Lego.getX: 1
-Lego.setX: 0
+Input.recursion: 99

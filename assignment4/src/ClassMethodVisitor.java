@@ -27,7 +27,6 @@ public class ClassMethodVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-        //System.out.println(name);
         if (!name.equals("<init>")) {
             mv = new MethodCoverageVisitor(mv, name);
         }
