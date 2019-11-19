@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class ClassMethodVisitor extends ClassVisitor {
-
     String className;
 
     public ClassMethodVisitor(String className, ClassWriter cw) {
@@ -29,8 +28,8 @@ public class ClassMethodVisitor extends ClassVisitor {
 }
 
 class MethodCoverageVisitor extends MethodVisitor {
-    private String className;
-    private String methodName;
+    String className;
+    String methodName;
 
     public MethodCoverageVisitor(MethodVisitor mv, String className, String methodName) {
         super(Opcodes.ASM5, mv);

@@ -110,7 +110,7 @@ class Dog extends Animal implements Sound {
 
     @Override
     public int getAge() {
-        return Calculator.multiply(7, age);
+        return Calculator.multiply(age, 7);
     }
 
     @Override

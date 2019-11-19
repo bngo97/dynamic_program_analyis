@@ -1,5 +1,5 @@
 Animal.getAge: 11
-Calculator.add: 20
+Calculator.add: 17
 Calculator.divide: 1
 Calculator.multiply: 2
 Calculator.subtract: 5
