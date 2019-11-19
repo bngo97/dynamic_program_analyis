@@ -4,7 +4,7 @@ public class Input {
 
     public static void main(String[] args) {
         Calculator.multiply(10,10);
-        Calculator.divide(55, 10);
+        Calculator.divide(777, 10);
         for(int i = 0; i < 9; i++) {
             recursion(10);
         }
@@ -14,7 +14,7 @@ public class Input {
         for(int i = 0; i < cat.getAge(); i++) {
             cat.makeSound();
         }
-        Dog dog = new Dog(10, "Retriever");
+        Dog dog = new Dog(10);
         int age = dog.getAge();
         while(age > 0) {
             dog.makeSound();
@@ -78,22 +78,17 @@ class Calculator {
 
 }
 
-interface Age {
-    public int getAge();
-}
-
 interface Sound {
     public String makeSound();
 }
 
-abstract class Animal implements Age {
+abstract class Animal {
     int age;
 
     public Animal(int age) {
         this.age = age;
     }
 
-    @Override
     public int getAge() {
         return age;
     }
@@ -101,11 +96,9 @@ abstract class Animal implements Age {
 }
 
 class Dog extends Animal implements Sound {
-    String breed;
 
-    public Dog(int age, String breed) {
+    public Dog(int age) {
         super(age);
-        this.breed = breed;
     }
 
     @Override
